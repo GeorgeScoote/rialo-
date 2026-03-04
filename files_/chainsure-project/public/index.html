@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChainSure - 链上保险协议</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #08080a;
+      background-image: 
+        radial-gradient(ellipse at 20% 0%, rgba(212,175,55,0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(180,140,50,0.02) 0%, transparent 50%);
+      min-height: 100vh;
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(212,175,55,0.5); }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(0deg); }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // THEME - 深色奢华金
+    // ══════════════════════════════════════════════════════════════════════════
+    const T = {
+      // 背景层次
+      bg: "#08080a", 
+      panel: "rgba(18,18,22,0.8)", 
+      raised: "rgba(28,28,35,0.9)",
+      card: "linear-gradient(145deg, rgba(22,22,28,0.95) 0%, rgba(15,15,18,0.98) 100%)",
+      
+      // 边框层次
+      b: "rgba(212,175,55,0.08)", 
+      b2: "rgba(212,175,55,0.15)",
+      b3: "rgba(212,175,55,0.25)",
+      
+      // 文字层次
+      tx: "#f8f6f0", 
+      tx2: "#c4b998", 
+      tx3: "#8a8270", 
+      tx4: "#5c5a52",
+      
+      // 主色 - 金色系
+      gold: "#d4af37",
+      goldLight: "#e8c547",
+      goldDark: "#b8960c",
+      goldBg: "rgba(212,175,55,0.08)",
+      goldBd: "rgba(212,175,55,0.2)",
+      
+      // 强调白
+      w: "#fffef8", 
+      wBg: "rgba(255,254,248,0.05)", 
+      wBd: "rgba(255,254,248,0.12)",
+      
+      // 状态色
+      success: "#7dd87d",
+      successBg: "rgba(125,216,125,0.1)",
+      successBd: "rgba(125,216,125,0.25)",
+      
+      error: "#e57373",
+      errorBg: "rgba(229,115,115,0.1)",
+      errorBd: "rgba(229,115,115,0.25)",
+      
+      warn: "#d4af37",
+      warnBg: "rgba(212,175,55,0.1)",
+      warnBd: "rgba(212,175,55,0.25)",
+    };
+    
+    // 字体
+    const ff = "'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans JP', 'Noto Sans KR', sans-serif";
+    const fm = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // INTERNATIONALIZATION (i18n)
+    // ══════════════════════════════════════════════════════════════════════════
+    const LANGS = {
+      zh: { code: "zh", name: "中文", flag: "🇨🇳" },
+      en: { code: "en", name: "English", flag: "🇺🇸" },
+      ja: { code: "ja", name: "日本語", flag: "🇯🇵" },
+      ko: { code: "ko", name: "한국어", flag: "🇰🇷" },
+    };
+
+    const i18n = {
+      zh: {
+        // Nav
+        nav_insure: "投保",
+        nav_policies: "保单",
+        nav_claims: "理赔",
+        nav_wallet: "钱包",
+        
+        // Header
+        brand_sub: "航班保险",
+        page_title: "航班延误保障",
+        page_desc: "选择您的航班和保障方案，延误超过 {threshold} 分钟将自动触发链上理赔",
+        smart_contract: "智能合约",
+        
+        // Products
+        product_flight: "航班延误",
+        product_health: "医疗保障",
+        product_auto: "车辆保险",
+        product_life: "人寿保险",
+        coming_soon: "即将上线",
+        
+        // Flight Selection
+        select_flight: "选择航班",
+        filter_all: "全部",
+        filter_domestic: "国内",
+        filter_international: "国际",
+        intl_badge: "国际",
+        delay_badge: "延误 {min}m",
+        ontime_badge: "准点率高",
+        
+        // Date
+        select_date: "出发日期",
+        tomorrow: "明天",
+        day_after: "后天",
+        plus_7_days: "+7天",
+        select_future_date: "请选择未来日期",
+        
+        // Plans
+        select_plan: "选择保障方案",
+        plan_basic: "基础",
+        plan_standard: "标准",
+        plan_premium: "高级",
+        plan_vip: "尊享",
+        premium_label: "保费",
+        payout_label: "延误≥{threshold}分钟赔付",
+        rate_hint: "费率 {rate}%：支付 {premium} RLO，延误可获赔 {payout} RLO",
+        
+        // Order
+        order_confirm: "订单确认",
+        you_pay: "您需支付",
+        you_get: "延误可获赔",
+        policy_details: "保单详情",
+        flight_label: "航班",
+        route_label: "航线",
+        date_label: "日期",
+        condition_label: "理赔条件",
+        delay_condition: "延误 ≥ {threshold} 分钟",
+        return_rate: "回报率：支付 {premium} 可获赔 {payout}，最高 {multiplier}x 回报",
+        
+        // Actions
+        connect_wallet: "连接钱包",
+        connecting: "连接中...",
+        confirm_pay: "确认支付 {amount} RLO",
+        processing: "处理中...",
+        connect_first: "请先连接钱包",
+        future_date_only: "只能购买未来日期的航班保险",
+        insufficient_balance: "余额不足",
+        daily_limit_reached: "今日保单已达上限（{max}份/天）",
+        daily_limit_hint: "今日已购 {count}/{max} 份",
+        
+        // Policies Page
+        my_policies: "我的保单",
+        policies_count: "{count} 份",
+        no_policies: "暂无保单",
+        no_policies_desc: "购买航班延误保险后，保单将显示在这里",
+        go_insure: "去投保",
+        active_policies: "生效中",
+        history_policies: "历史记录",
+        policy_active: "生效中",
+        can_settle: "航班已起飞，可以结算",
+        waiting_flight: "等待 {date} 航班起飞",
+        settle_now: "立即结算",
+        settling: "结算中...",
+        waiting: "等待中",
+        claimed: "已理赔",
+        expired: "已过期",
+        delay_min: "延误 {min} 分钟",
+        
+        // Claims Page
+        claims_title: "理赔记录",
+        no_claims: "暂无理赔记录",
+        no_claims_desc: "航班延误超过 {threshold} 分钟将自动理赔",
+        total_claimed: "累计理赔",
+        claim_details: "理赔明细",
+        claim_time: "理赔时间",
+        
+        // Wallet Page
+        wallet_title: "钱包",
+        balance: "余额",
+        connected: "已连接",
+        address: "地址",
+        disconnect: "断开连接",
+        tx_history: "交易记录",
+        no_tx: "暂无交易记录",
+        tx_connect: "钱包已连接",
+        tx_disconnect: "钱包已断开",
+        tx_purchase: "购买 {flight} 保险",
+        tx_claim: "{flight} 理赔到账 (延误{min}分钟)",
+        tx_expire: "{flight} 保单过期 (延误{min}分钟)",
+        
+        // Network
+        protocol: "协议",
+        network: "网络",
+        contract: "合约",
+      },
+      
+      en: {
+        nav_insure: "Insure",
+        nav_policies: "Policies",
+        nav_claims: "Claims",
+        nav_wallet: "Wallet",
+        
+        brand_sub: "Flight Insurance",
+        page_title: "Flight Delay Protection",
+        page_desc: "Select your flight and coverage plan. Claims are automatically triggered on-chain when delays exceed {threshold} minutes",
+        smart_contract: "Smart Contract",
+        
+        product_flight: "Flight Delay",
+        product_health: "Health",
+        product_auto: "Auto",
+        product_life: "Life",
+        coming_soon: "Soon",
+        
+        select_flight: "Select Flight",
+        filter_all: "All",
+        filter_domestic: "Domestic",
+        filter_international: "Int'l",
+        intl_badge: "Int'l",
+        delay_badge: "Delay {min}m",
+        ontime_badge: "On-time",
+        
+        select_date: "Departure Date",
+        tomorrow: "Tomorrow",
+        day_after: "In 2 days",
+        plus_7_days: "+7 days",
+        select_future_date: "Select a future date",
+        
+        select_plan: "Select Coverage Plan",
+        plan_basic: "Basic",
+        plan_standard: "Standard",
+        plan_premium: "Premium",
+        plan_vip: "VIP",
+        premium_label: "Premium",
+        payout_label: "Payout if delay ≥{threshold}min",
+        rate_hint: "Rate {rate}%: Pay {premium} RLO, get {payout} RLO if delayed",
+        
+        order_confirm: "Order Confirmation",
+        you_pay: "You Pay",
+        you_get: "Payout if Delayed",
+        policy_details: "Policy Details",
+        flight_label: "Flight",
+        route_label: "Route",
+        date_label: "Date",
+        condition_label: "Claim Condition",
+        delay_condition: "Delay ≥ {threshold} min",
+        return_rate: "Return: Pay {premium}, get {payout}, up to {multiplier}x",
+        
+        connect_wallet: "Connect Wallet",
+        connecting: "Connecting...",
+        confirm_pay: "Confirm Payment {amount} RLO",
+        processing: "Processing...",
+        connect_first: "Please connect wallet first",
+        future_date_only: "Can only purchase for future flights",
+        insufficient_balance: "Insufficient balance",
+        daily_limit_reached: "Daily limit reached ({max} policies/day)",
+        daily_limit_hint: "Today: {count}/{max} policies",
+        
+        my_policies: "My Policies",
+        policies_count: "{count} policies",
+        no_policies: "No Policies",
+        no_policies_desc: "Your policies will appear here after purchase",
+        go_insure: "Get Insured",
+        active_policies: "Active",
+        history_policies: "History",
+        policy_active: "Active",
+        can_settle: "Flight departed, ready to settle",
+        waiting_flight: "Waiting for {date} departure",
+        settle_now: "Settle Now",
+        settling: "Settling...",
+        waiting: "Waiting",
+        claimed: "Claimed",
+        expired: "Expired",
+        delay_min: "Delayed {min} min",
+        
+        claims_title: "Claim History",
+        no_claims: "No Claims Yet",
+        no_claims_desc: "Claims are auto-processed when delay exceeds {threshold} minutes",
+        total_claimed: "Total Claimed",
+        claim_details: "Claim Details",
+        claim_time: "Claim Time",
+        
+        wallet_title: "Wallet",
+        balance: "Balance",
+        connected: "Connected",
+        address: "Address",
+        disconnect: "Disconnect",
+        tx_history: "Transaction History",
+        no_tx: "No transactions yet",
+        tx_connect: "Wallet connected",
+        tx_disconnect: "Wallet disconnected",
+        tx_purchase: "Purchased {flight} insurance",
+        tx_claim: "{flight} claim received (delay {min}min)",
+        tx_expire: "{flight} policy expired (delay {min}min)",
+        
+        protocol: "Protocol",
+        network: "Network",
+        contract: "Contract",
+      },
+      
+      ja: {
+        nav_insure: "加入",
+        nav_policies: "保険証券",
+        nav_claims: "請求",
+        nav_wallet: "ウォレット",
+        
+        brand_sub: "フライト保険",
+        page_title: "フライト遅延保障",
+        page_desc: "フライトと補償プランを選択。{threshold}分以上の遅延で自動的にオンチェーン請求が実行されます",
+        smart_contract: "スマートコントラクト",
+        
+        product_flight: "フライト遅延",
+        product_health: "医療",
+        product_auto: "自動車",
+        product_life: "生命",
+        coming_soon: "近日公開",
+        
+        select_flight: "フライトを選択",
+        filter_all: "すべて",
+        filter_domestic: "国内",
+        filter_international: "国際",
+        intl_badge: "国際",
+        delay_badge: "遅延 {min}分",
+        ontime_badge: "定時運航",
+        
+        select_date: "出発日",
+        tomorrow: "明日",
+        day_after: "明後日",
+        plus_7_days: "+7日",
+        select_future_date: "将来の日付を選択してください",
+        
+        select_plan: "補償プランを選択",
+        plan_basic: "ベーシック",
+        plan_standard: "スタンダード",
+        plan_premium: "プレミアム",
+        plan_vip: "VIP",
+        premium_label: "保険料",
+        payout_label: "遅延≥{threshold}分で支払い",
+        rate_hint: "料率 {rate}%：{premium} RLO支払い、遅延時{payout} RLO受取",
+        
+        order_confirm: "注文確認",
+        you_pay: "お支払い",
+        you_get: "遅延時の受取",
+        policy_details: "保険詳細",
+        flight_label: "フライト",
+        route_label: "路線",
+        date_label: "日付",
+        condition_label: "請求条件",
+        delay_condition: "遅延 ≥ {threshold} 分",
+        return_rate: "リターン：{premium}支払い→{payout}受取、最大{multiplier}倍",
+        
+        connect_wallet: "ウォレット接続",
+        connecting: "接続中...",
+        confirm_pay: "{amount} RLO 支払いを確認",
+        processing: "処理中...",
+        connect_first: "先にウォレットを接続してください",
+        future_date_only: "将来のフライトのみ購入可能です",
+        insufficient_balance: "残高不足",
+        daily_limit_reached: "本日の上限に達しました（{max}件/日）",
+        daily_limit_hint: "本日: {count}/{max} 件",
+        
+        my_policies: "マイ保険証券",
+        policies_count: "{count} 件",
+        no_policies: "保険証券なし",
+        no_policies_desc: "購入後、保険証券がここに表示されます",
+        go_insure: "加入する",
+        active_policies: "有効",
+        history_policies: "履歴",
+        policy_active: "有効",
+        can_settle: "フライト出発済み、決済可能",
+        waiting_flight: "{date} の出発を待っています",
+        settle_now: "今すぐ決済",
+        settling: "決済中...",
+        waiting: "待機中",
+        claimed: "請求済み",
+        expired: "期限切れ",
+        delay_min: "遅延 {min} 分",
+        
+        claims_title: "請求履歴",
+        no_claims: "請求履歴なし",
+        no_claims_desc: "{threshold}分以上の遅延で自動請求されます",
+        total_claimed: "請求総額",
+        claim_details: "請求明細",
+        claim_time: "請求時刻",
+        
+        wallet_title: "ウォレット",
+        balance: "残高",
+        connected: "接続済み",
+        address: "アドレス",
+        disconnect: "切断",
+        tx_history: "取引履歴",
+        no_tx: "取引履歴なし",
+        tx_connect: "ウォレット接続完了",
+        tx_disconnect: "ウォレット切断",
+        tx_purchase: "{flight} 保険を購入",
+        tx_claim: "{flight} 請求受取 (遅延{min}分)",
+        tx_expire: "{flight} 保険期限切れ (遅延{min}分)",
+        
+        protocol: "プロトコル",
+        network: "ネットワーク",
+        contract: "コントラクト",
+      },
+      
+      ko: {
+        nav_insure: "가입",
+        nav_policies: "보험증권",
+        nav_claims: "청구",
+        nav_wallet: "지갑",
+        
+        brand_sub: "항공 보험",
+        page_title: "항공편 지연 보장",
+        page_desc: "항공편과 보장 플랜을 선택하세요. {threshold}분 이상 지연 시 온체인에서 자동으로 청구가 실행됩니다",
+        smart_contract: "스마트 컨트랙트",
+        
+        product_flight: "항공 지연",
+        product_health: "의료",
+        product_auto: "자동차",
+        product_life: "생명",
+        coming_soon: "출시 예정",
+        
+        select_flight: "항공편 선택",
+        filter_all: "전체",
+        filter_domestic: "국내",
+        filter_international: "국제",
+        intl_badge: "국제",
+        delay_badge: "지연 {min}분",
+        ontime_badge: "정시 운항",
+        
+        select_date: "출발일",
+        tomorrow: "내일",
+        day_after: "모레",
+        plus_7_days: "+7일",
+        select_future_date: "미래 날짜를 선택하세요",
+        
+        select_plan: "보장 플랜 선택",
+        plan_basic: "베이직",
+        plan_standard: "스탠다드",
+        plan_premium: "프리미엄",
+        plan_vip: "VIP",
+        premium_label: "보험료",
+        payout_label: "지연≥{threshold}분 시 지급",
+        rate_hint: "요율 {rate}%: {premium} RLO 지불, 지연 시 {payout} RLO 수령",
+        
+        order_confirm: "주문 확인",
+        you_pay: "지불 금액",
+        you_get: "지연 시 수령액",
+        policy_details: "보험 상세",
+        flight_label: "항공편",
+        route_label: "노선",
+        date_label: "날짜",
+        condition_label: "청구 조건",
+        delay_condition: "지연 ≥ {threshold} 분",
+        return_rate: "수익률: {premium} 지불 → {payout} 수령, 최대 {multiplier}배",
+        
+        connect_wallet: "지갑 연결",
+        connecting: "연결 중...",
+        confirm_pay: "{amount} RLO 결제 확인",
+        processing: "처리 중...",
+        connect_first: "먼저 지갑을 연결하세요",
+        future_date_only: "미래 항공편만 구매 가능합니다",
+        insufficient_balance: "잔액 부족",
+        daily_limit_reached: "일일 한도 도달 ({max}건/일)",
+        daily_limit_hint: "오늘: {count}/{max} 건",
+        
+        my_policies: "내 보험증권",
+        policies_count: "{count} 건",
+        no_policies: "보험증권 없음",
+        no_policies_desc: "구매 후 보험증권이 여기에 표시됩니다",
+        go_insure: "가입하기",
+        active_policies: "유효",
+        history_policies: "기록",
+        policy_active: "유효",
+        can_settle: "항공편 출발 완료, 정산 가능",
+        waiting_flight: "{date} 출발 대기 중",
+        settle_now: "지금 정산",
+        settling: "정산 중...",
+        waiting: "대기 중",
+        claimed: "청구 완료",
+        expired: "만료",
+        delay_min: "지연 {min} 분",
+        
+        claims_title: "청구 기록",
+        no_claims: "청구 기록 없음",
+        no_claims_desc: "{threshold}분 이상 지연 시 자동 청구됩니다",
+        total_claimed: "총 청구액",
+        claim_details: "청구 상세",
+        claim_time: "청구 시간",
+        
+        wallet_title: "지갑",
+        balance: "잔액",
+        connected: "연결됨",
+        address: "주소",
+        disconnect: "연결 해제",
+        tx_history: "거래 내역",
+        no_tx: "거래 내역 없음",
+        tx_connect: "지갑 연결 완료",
+        tx_disconnect: "지갑 연결 해제",
+        tx_purchase: "{flight} 보험 구매",
+        tx_claim: "{flight} 청구 수령 (지연 {min}분)",
+        tx_expire: "{flight} 보험 만료 (지연 {min}분)",
+        
+        protocol: "프로토콜",
+        network: "네트워크",
+        contract: "컨트랙트",
+      },
+    };
+
+    // 翻译函数
+    const t = (lang, key, params = {}) => {
+      let text = i18n[lang]?.[key] || i18n.zh[key] || key;
+      Object.entries(params).forEach(([k, v]) => {
+        text = text.replace(`{${k}}`, v);
+      });
+      return text;
+    };
+
+    // 语言 Context
+    const LangContext = createContext();
+    const useLang = () => useContext(LangContext);
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // CONTRACT CONSTANTS
+    // ══════════════════════════════════════════════════════════════════════════
+    const PROGRAM_ID = "ChainSure1111111111111111111111111111111111";
+    const KELVIN_PER_RLO = 1_000_000_000n;
+    const DELAY_THRESHOLD = 120; // minutes
+    const MAX_POLICIES_PER_DAY = 5; // 每用户每天最多5个保单
+
+    const PolicyStatus = { Active: 0, Claimed: 1, Expired: 2, Cancelled: 3 };
+    
+    // 保障方案
+    const TIERS = [
+      { premium: 50, payout: 200, nameKey: "plan_basic", rate: 25 },
+      { premium: 100, payout: 500, nameKey: "plan_standard", rate: 20 },
+      { premium: 200, payout: 1000, nameKey: "plan_premium", rate: 20 },
+      { premium: 500, payout: 2000, nameKey: "plan_vip", rate: 25 },
+    ];
+
+    // 产品线
+    const PRODUCTS = [
+      { id: "flight", name: "Flight", labelKey: "product_flight", icon: "✈️", active: true },
+      { id: "health", name: "Health", labelKey: "product_health", icon: "🏥", active: false },
+      { id: "auto", name: "Auto", labelKey: "product_auto", icon: "🚗", active: false },
+      { id: "life", name: "Life", labelKey: "product_life", icon: "❤️", active: false },
+    ];
+
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const n = v => typeof v === 'bigint' ? Number(v).toLocaleString() : v.toLocaleString();
+    const shortAddr = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "";
+    const shortSig = (sig) => sig ? `${sig.slice(0, 8)}...${sig.slice(-6)}` : "";
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // RIALO SDK INTEGRATION
+    // 真实环境需要: npm install @rialo/ts-cdk @rialo/frost-core
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /*
+     * 生产环境导入:
+     * import { createRialoClient, getDefaultRialoClientConfig, PublicKey, TransactionBuilder } from "@rialo/ts-cdk";
+     * import { createConfig, connect, disconnect, signAndSendTransaction, WalletRegistry, WalletEventBridge, initializeConfig } from "@rialo/frost-core";
+     */
+
+    // PDA Seeds
+    const SEEDS = {
+      CONFIG: new TextEncoder().encode("config"),
+      POLICY: new TextEncoder().encode("policy"),
+      CLAIM: new TextEncoder().encode("claim"),
+      TREASURY: new TextEncoder().encode("treasury"),
+    };
+
+    // PDA 派生函数
+    const getPolicyAddress = (owner, flightIata, date) => {
+      // 真实代码:
+      // return PublicKey.findProgramAddress(
+      //   [SEEDS.POLICY, PublicKey.fromString(owner).toBytes(), 
+      //    new TextEncoder().encode(flightIata), new TextEncoder().encode(date)],
+      //   PublicKey.fromString(PROGRAM_ID)
+      // );
+      
+      // 临时: 生成确定性地址用于演示
+      const hash = btoa(`${owner.slice(0,16)}_${flightIata}_${date}`).replace(/[+/=]/g, 'x').slice(0, 32);
+      return [`policy_${hash}`, 255];
+    };
+
+    const getClaimAddress = (policyAddress) => {
+      // 真实代码:
+      // return PublicKey.findProgramAddress(
+      //   [SEEDS.CLAIM, PublicKey.fromString(policyAddress).toBytes()],
+      //   PublicKey.fromString(PROGRAM_ID)
+      // );
+      return [`claim_${policyAddress.slice(0, 24)}`, 255];
+    };
+
+    const getConfigAddress = () => {
+      return [`config_${PROGRAM_ID.slice(0, 16)}`, 255];
+    };
+
+    const getTreasuryAddress = () => {
+      return [`treasury_${PROGRAM_ID.slice(0, 16)}`, 255];
+    };
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // RIALO CLIENT WRAPPER
+    // ══════════════════════════════════════════════════════════════════════════
+
+    class RialoSDK {
+      constructor(network = "devnet") {
+        this.network = network;
+        this.rpcUrl = `https://${network}.rialo.network`;
+        this.client = null;
+        this.frostConfig = null;
+        this.registry = null;
+        this.bridge = null;
+        this.walletAddress = null;
+        this.initialized = false;
+      }
+
+      async initialize() {
+        if (this.initialized) return;
+        
+        // 真实代码:
+        // const clientConfig = getDefaultRialoClientConfig(this.network);
+        // this.client = createRialoClient(clientConfig);
+        // this.frostConfig = createConfig({ clientConfig, autoConnect: true });
+        // this.registry = new WalletRegistry(this.frostConfig);
+        // this.bridge = new WalletEventBridge(this.frostConfig);
+        // initializeConfig(this.frostConfig, this.registry, this.bridge);
+        // await this.registry.ready;
+
+        console.log(`[RialoSDK] Initialized on ${this.network}`);
+        this.initialized = true;
+      }
+
+      async connect(walletName = "Rialo") {
+        await this.initialize();
+        
+        // 真实代码:
+        // const { walletName: name, accountAddress } = await connect(this.frostConfig, { walletName });
+        // this.walletAddress = accountAddress;
+        // return { walletName: name, accountAddress };
+
+        // 演示模式: 模拟钱包连接
+        await sleep(800);
+        const accountAddress = "7xKXtg" + [...Array(38)].map(() =>
+          "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789"[Math.random() * 58 | 0]
+        ).join("");
+        this.walletAddress = accountAddress;
+        console.log(`[RialoSDK] Connected: ${accountAddress}`);
+        return { walletName, accountAddress };
+      }
+
+      async disconnect() {
+        // 真实代码:
+        // await disconnect(this.frostConfig);
+        
+        this.walletAddress = null;
+        console.log("[RialoSDK] Disconnected");
+      }
+
+      async getBalance(address) {
+        // 真实代码:
+        // const publicKey = PublicKey.fromString(address || this.walletAddress);
+        // return await this.client.getBalance(publicKey);
+
+        // 演示模式
+        await sleep(300);
+        return BigInt(10000) * KELVIN_PER_RLO;
+      }
+
+      async getAccountInfo(address) {
+        // 真实代码:
+        // return await this.client.getAccountInfo(PublicKey.fromString(address));
+        
+        await sleep(200);
+        return null;
+      }
+
+      async purchasePolicy(params) {
+        const { owner, flightIata, flightIcao, date, scheduledDeparture, depAirport, arrAirport, payoutAmount, premiumAmount } = params;
+        
+        // 使用传入的保费和赔付金额
+        const premiumKelvin = BigInt(premiumAmount) * KELVIN_PER_RLO;
+        const payoutKelvin = BigInt(payoutAmount) * KELVIN_PER_RLO;
+
+        // 获取 PDA 地址
+        const [policyAddress, policyBump] = getPolicyAddress(owner, flightIata, date);
+        const [configAddress] = getConfigAddress();
+        const [treasuryAddress] = getTreasuryAddress();
+
+        console.log(`[RialoSDK] PurchasePolicy:`, { policyAddress, premium: premiumAmount, payout: payoutAmount });
+
+        // 真实代码:
+        // const instructionData = this.encodePurchaseInstruction({
+        //   flightIata, flightIcao, date, scheduledDeparture, depAirport, arrAirport,
+        //   payoutAmount: payoutKelvin, premiumAmount: premiumKelvin, bump: policyBump
+        // });
+        // 
+        // const tx = TransactionBuilder.create()
+        //   .setPayer(PublicKey.fromString(owner))
+        //   .setValidFrom(BigInt(Date.now()))
+        //   .addInstruction({
+        //     programId: PublicKey.fromString(PROGRAM_ID),
+        //     accounts: [
+        //       { pubkey: PublicKey.fromString(owner), isSigner: true, isWritable: true },
+        //       { pubkey: PublicKey.fromString(policyAddress), isSigner: false, isWritable: true },
+        //       { pubkey: PublicKey.fromString(configAddress), isSigner: false, isWritable: true },
+        //       { pubkey: PublicKey.fromString(treasuryAddress), isSigner: false, isWritable: true },
+        //       { pubkey: PublicKey.fromString("11111111111111111111111111111111"), isSigner: false, isWritable: false },
+        //     ],
+        //     data: instructionData,
+        //   })
+        //   .build();
+        //
+        // const { signature } = await signAndSendTransaction(this.frostConfig, { transaction: tx });
+
+        // 演示模式
+        await sleep(1200);
+        const signature = [...Array(64)].map(() => (Math.random() * 16 | 0).toString(16)).join("");
+        
+        console.log(`[RialoSDK] TX Signature: ${signature}`);
+
+        return {
+          signature,
+          policyAddress,
+          premium: premiumKelvin,
+          payout: payoutKelvin,
+        };
+      }
+
+      async settlePolicy(params) {
+        const { owner, policyAddress, flightIata, date } = params;
+        
+        const [claimAddress] = getClaimAddress(policyAddress);
+        const [configAddress] = getConfigAddress();
+        const [treasuryAddress] = getTreasuryAddress();
+
+        console.log(`[RialoSDK] SettlePolicy:`, { policyAddress, claimAddress });
+
+        // 真实代码:
+        // const instructionData = this.encodeManualSettleInstruction();
+        //
+        // const tx = TransactionBuilder.create()
+        //   .setPayer(PublicKey.fromString(owner))
+        //   .setValidFrom(BigInt(Date.now()))
+        //   .addInstruction({
+        //     programId: PublicKey.fromString(PROGRAM_ID),
+        //     accounts: [
+        //       { pubkey: PublicKey.fromString(owner), isSigner: true, isWritable: true },
+        //       { pubkey: PublicKey.fromString(policyAddress), isSigner: false, isWritable: true },
+        //       { pubkey: PublicKey.fromString(claimAddress), isSigner: false, isWritable: true },
+        //       { pubkey: PublicKey.fromString(treasuryAddress), isSigner: false, isWritable: true },
+        //       { pubkey: PublicKey.fromString(configAddress), isSigner: false, isWritable: false },
+        //       { pubkey: PublicKey.fromString("11111111111111111111111111111111"), isSigner: false, isWritable: false },
+        //     ],
+        //     data: instructionData,
+        //   })
+        //   .build();
+        //
+        // const { signature } = await signAndSendTransaction(this.frostConfig, { transaction: tx });
+
+        // 演示模式
+        await sleep(1500);
+        const signature = [...Array(64)].map(() => (Math.random() * 16 | 0).toString(16)).join("");
+
+        console.log(`[RialoSDK] Settle TX: ${signature}`);
+
+        return { signature, claimAddress };
+      }
+
+      async getPoliciesByOwner(owner) {
+        // 真实代码:
+        // const accounts = await this.client.getProgramAccounts(
+        //   PublicKey.fromString(PROGRAM_ID),
+        //   { filters: [{ memcmp: { offset: 1, bytes: owner } }] }
+        // );
+        // return accounts.map(a => this.deserializePolicy(a.pubkey, a.account.data));
+
+        // 演示模式: 返回空数组，实际数据在前端状态管理
+        return [];
+      }
+
+      // Borsh 编码 (简化版，实际需要完整实现)
+      encodePurchaseInstruction(params) {
+        // 指令 discriminator: 1 = PurchasePolicy
+        // 实际需要 Borsh 序列化所有字段
+        return new Uint8Array([1, ...new TextEncoder().encode(JSON.stringify(params))]);
+      }
+
+      encodeManualSettleInstruction() {
+        // 指令 discriminator: 3 = ManualSettle
+        return new Uint8Array([3]);
+      }
+
+      destroy() {
+        // 真实代码:
+        // this.frostConfig?.destroy();
+        console.log("[RialoSDK] Destroyed");
+      }
+    }
+
+    // 全局 SDK 实例
+    const rialoSDK = new RialoSDK("devnet");
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // FLIGHT DATA (实际应从 API 获取)
+    // ══════════════════════════════════════════════════════════════════════════
+    const FLIGHTS = [
+      { id: "CA1234", iata: "CA1234", icao: "CCA1234", airline: { name: "中国国航" },
+        dep: { iata: "PEK", city: "北京首都", scheduled: "14:30" },
+        arr: { iata: "SHA", city: "上海虹桥", scheduled: "16:55" },
+        aircraft: { model: "Airbus A330-300" }, duration: 145, dep_delayed: 165, intl: false },
+      { id: "MU5678", iata: "MU5678", icao: "CES5678", airline: { name: "东方航空" },
+        dep: { iata: "PVG", city: "上海浦东", scheduled: "09:15" },
+        arr: { iata: "CAN", city: "广州白云", scheduled: "11:40" },
+        aircraft: { model: "Boeing 737-800" }, duration: 143, dep_delayed: 7, intl: false },
+      { id: "CZ3090", iata: "CZ3090", icao: "CSN3090", airline: { name: "南方航空" },
+        dep: { iata: "CAN", city: "广州白云", scheduled: "16:45" },
+        arr: { iata: "CTU", city: "成都天府", scheduled: "19:15" },
+        aircraft: { model: "Airbus A321neo" }, duration: 150, dep_delayed: 243, intl: false },
+      { id: "HU7801", iata: "HU7801", icao: "CHH7801", airline: { name: "海南航空" },
+        dep: { iata: "PEK", city: "北京首都", scheduled: "11:00" },
+        arr: { iata: "SZX", city: "深圳宝安", scheduled: "14:10" },
+        aircraft: { model: "Boeing 787-9" }, duration: 183, dep_delayed: 35, intl: false },
+      { id: "CA985", iata: "CA985", icao: "CCA985", airline: { name: "中国国航" },
+        dep: { iata: "PEK", city: "北京首都", scheduled: "01:30" },
+        arr: { iata: "JFK", city: "纽约肯尼迪", scheduled: "02:30" },
+        aircraft: { model: "Boeing 777-300ER" }, duration: 780, dep_delayed: 156, intl: true },
+      { id: "SQ807", iata: "SQ807", icao: "SIA807", airline: { name: "新加坡航空" },
+        dep: { iata: "SIN", city: "新加坡樟宜", scheduled: "08:45" },
+        arr: { iata: "PEK", city: "北京首都", scheduled: "15:00" },
+        aircraft: { model: "Airbus A350-900" }, duration: 375, dep_delayed: 197, intl: true },
+      { id: "NH960", iata: "NH960", icao: "ANA960", airline: { name: "全日空" },
+        dep: { iata: "NRT", city: "东京成田", scheduled: "10:20" },
+        arr: { iata: "PVG", city: "上海浦东", scheduled: "12:45" },
+        aircraft: { model: "Boeing 787-9" }, duration: 200, dep_delayed: 15, intl: true },
+      { id: "KE831", iata: "KE831", icao: "KAL831", airline: { name: "大韩航空" },
+        dep: { iata: "ICN", city: "首尔仁川", scheduled: "09:00" },
+        arr: { iata: "PEK", city: "北京首都", scheduled: "10:05" },
+        aircraft: { model: "Airbus A330-300" }, duration: 125, dep_delayed: 180, intl: true },
+    ];
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // GLOBAL STATE (链上数据缓存 + SDK 交互)
+    // ══════════════════════════════════════════════════════════════════════════
+    const AppContext = createContext();
+
+    function AppProvider({ children }) {
+      const [wallet, setWallet] = useState(null);
+      const [balance, setBalance] = useState(0n);
+      const [policies, setPolicies] = useState([]);
+      const [claims, setClaims] = useState([]);
+      const [txHistory, setTxHistory] = useState([]);
+      const [page, setPage] = useState("home");
+      const [loading, setLoading] = useState(false);
+
+      // 初始化 SDK
+      useEffect(() => {
+        rialoSDK.initialize();
+        return () => rialoSDK.destroy();
+      }, []);
+
+      // 刷新链上数据
+      const refreshData = useCallback(async () => {
+        if (!wallet) return;
+        setLoading(true);
+        try {
+          const bal = await rialoSDK.getBalance(wallet);
+          setBalance(bal);
+          
+          // 真实环境: 从链上查询保单
+          // const onChainPolicies = await rialoSDK.getPoliciesByOwner(wallet);
+          // setPolicies(onChainPolicies);
+        } catch (e) {
+          console.error("[App] Refresh failed:", e);
+        }
+        setLoading(false);
+      }, [wallet]);
+
+      // 连接钱包
+      const connect = async () => {
+        setLoading(true);
+        try {
+          const { accountAddress } = await rialoSDK.connect("Rialo");
+          setWallet(accountAddress);
+          
+          const bal = await rialoSDK.getBalance(accountAddress);
+          setBalance(bal);
+          
+          addTx({ 
+            type: "connect", 
+            time: Date.now(), 
+            desc: "钱包已连接", 
+            address: shortAddr(accountAddress) 
+          });
+        } catch (e) {
+          console.error("[App] Connect failed:", e);
+        }
+        setLoading(false);
+      };
+
+      // 断开连接
+      const disconnect = async () => {
+        await rialoSDK.disconnect();
+        setWallet(null);
+        setBalance(0n);
+        setPolicies([]);
+        setClaims([]);
+        addTx({ type: "disconnect", time: Date.now(), desc: "钱包已断开" });
+      };
+
+      // 获取今日购买的保单数量
+      const getTodayPolicyCount = () => {
+        const today = new Date().toISOString().split("T")[0];
+        const todayStart = new Date(today).getTime();
+        const todayEnd = todayStart + 24 * 60 * 60 * 1000;
+        return policies.filter(p => p.createdAt >= todayStart && p.createdAt < todayEnd).length;
+      };
+
+      // 检查是否可以购买
+      const canPurchaseMore = () => {
+        return getTodayPolicyCount() < MAX_POLICIES_PER_DAY;
+      };
+
+      // 购买保险
+      const purchasePolicy = async (flight, date, payoutAmount, premiumAmount) => {
+        if (!wallet) throw new Error("Wallet not connected");
+        
+        // 检查每日限额
+        if (!canPurchaseMore()) {
+          throw new Error(`DAILY_LIMIT:${MAX_POLICIES_PER_DAY}`);
+        }
+
+        const result = await rialoSDK.purchasePolicy({
+          owner: wallet,
+          flightIata: flight.iata,
+          flightIcao: flight.icao,
+          date,
+          scheduledDeparture: flight.dep.scheduled,
+          depAirport: flight.dep.iata,
+          arrAirport: flight.arr.iata,
+          payoutAmount,
+          premiumAmount,
+        });
+
+        // 创建本地保单记录
+        const policy = {
+          address: result.policyAddress,
+          owner: wallet,
+          flightIata: flight.iata,
+          flightIcao: flight.icao,
+          flight: flight,
+          date: date,
+          scheduledDeparture: flight.dep.scheduled,
+          depAirport: flight.dep.iata,
+          arrAirport: flight.arr.iata,
+          payoutAmount: result.payout,
+          premiumPaid: result.premium,
+          status: PolicyStatus.Active,
+          createdAt: Date.now(),
+          settledAt: null,
+          actualDelayMinutes: null,
+          txSignature: result.signature,
+        };
+
+        setPolicies(prev => [policy, ...prev]);
+        setBalance(prev => prev - result.premium);
+        
+        addTx({
+          type: "purchase",
+          time: Date.now(),
+          amount: -Number(result.premium / KELVIN_PER_RLO),
+          desc: `购买 ${flight.iata} 保险`,
+          signature: result.signature,
+        });
+
+        return { signature: result.signature, policy };
+      };
+
+      // 结算保单
+      const settlePolicy = async (policy) => {
+        if (!wallet) throw new Error("Wallet not connected");
+
+        const result = await rialoSDK.settlePolicy({
+          owner: wallet,
+          policyAddress: policy.address,
+          flightIata: policy.flightIata,
+          date: policy.date,
+        });
+
+        // 真实环境: 从链上事件获取延误数据
+        // 演示模式: 使用航班的 mock 数据
+        const delayed = policy.flight.dep_delayed;
+        const hit = delayed >= DELAY_THRESHOLD;
+
+        // 更新保单状态
+        setPolicies(prev => prev.map(p =>
+          p.address === policy.address
+            ? { ...p, status: hit ? PolicyStatus.Claimed : PolicyStatus.Expired, settledAt: Date.now(), actualDelayMinutes: delayed }
+            : p
+        ));
+
+        if (hit) {
+          // 创建理赔记录
+          const claim = {
+            address: result.claimAddress,
+            policy: policy.address,
+            owner: wallet,
+            amount: policy.payoutAmount,
+            delayMinutes: delayed,
+            timestamp: Date.now(),
+            transferSignature: result.signature,
+          };
+          setClaims(prev => [claim, ...prev]);
+          setBalance(prev => prev + policy.payoutAmount);
+          
+          addTx({
+            type: "claim",
+            time: Date.now(),
+            amount: Number(policy.payoutAmount / KELVIN_PER_RLO),
+            desc: `${policy.flightIata} 理赔到账 (延误${delayed}分钟)`,
+            signature: result.signature,
+          });
+        } else {
+          addTx({
+            type: "expire",
+            time: Date.now(),
+            amount: 0,
+            desc: `${policy.flightIata} 保单过期 (延误${delayed}分钟 < ${DELAY_THRESHOLD}分钟)`,
+            signature: result.signature,
+          });
+        }
+
+        return { signature: result.signature, hit, delayed };
+      };
+
+      const addTx = (tx) => setTxHistory(prev => [tx, ...prev]);
+
+      return (
+        <AppContext.Provider value={{
+          wallet, balance, policies, claims, txHistory, page, loading,
+          setPage, connect, disconnect, purchasePolicy, settlePolicy, refreshData, addTx,
+          getTodayPolicyCount, canPurchaseMore,
+        }}>
+          {children}
+        </AppContext.Provider>
+      );
+    }
+
+    const useApp = () => useContext(AppContext);
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // UI COMPONENTS
+    // ══════════════════════════════════════════════════════════════════════════
+    
+    function Anim({ value }) {
+      const [v, setV] = useState(0);
+      const target = typeof value === 'bigint' ? Number(value / KELVIN_PER_RLO) : value;
+      useEffect(() => {
+        let from = v, start = null;
+        const step = (ts) => {
+          if (!start) start = ts;
+          const p = Math.min((ts - start) / 400, 1);
+          setV(Math.round(from + (target - from) * (1 - Math.pow(1 - p, 3))));
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }, [target]);
+      return n(v);
+    }
+
+    function Card({ children, style = {}, onClick, glow, variant = "default" }) {
+      const variants = {
+        default: {
+          bg: T.card,
+          bd: T.b,
+          shadow: "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)"
+        },
+        highlight: {
+          bg: `linear-gradient(145deg, rgba(212,175,55,0.08) 0%, rgba(15,15,18,0.98) 100%)`,
+          bd: T.goldBd,
+          shadow: "0 4px 32px rgba(212,175,55,0.1), inset 0 1px 0 rgba(212,175,55,0.1)"
+        }
+      };
+      const v = variants[variant];
+      return (
+        <div onClick={onClick} style={{ 
+          background: v.bg,
+          border: "1px solid " + v.bd,
+          borderRadius: 16,
+          padding: "24px 26px",
+          cursor: onClick ? "pointer" : "default",
+          boxShadow: v.shadow,
+          backdropFilter: "blur(10px)",
+          transition: "all 0.25s ease",
+          ...style 
+        }}>
+          {children}
+        </div>
+      );
+    }
+
+    function Badge({ children, variant = "default" }) {
+      const styles = {
+        default: { bg: "rgba(255,254,248,0.06)", bd: "rgba(255,254,248,0.1)", c: T.tx2 },
+        warning: { bg: "rgba(212,175,55,0.12)", bd: "rgba(212,175,55,0.25)", c: T.gold },
+        success: { bg: "rgba(125,216,125,0.1)", bd: "rgba(125,216,125,0.2)", c: T.success },
+        error: { bg: "rgba(229,115,115,0.1)", bd: "rgba(229,115,115,0.2)", c: T.error },
+        info: { bg: "rgba(212,175,55,0.08)", bd: "rgba(212,175,55,0.15)", c: T.gold },
+        gold: { bg: "linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(180,140,50,0.15) 100%)", bd: T.goldBd, c: T.gold },
+      };
+      const s = styles[variant] || styles.default;
+      return (
+        <span style={{ 
+          fontSize: 10, 
+          fontWeight: 600, 
+          padding: "4px 10px", 
+          borderRadius: 6,
+          background: s.bg, 
+          color: s.c, 
+          border: "1px solid " + s.bd,
+          letterSpacing: "0.02em",
+          textTransform: "uppercase",
+        }}>
+          {children}
+        </span>
+      );
+    }
+
+    function Button({ children, onClick, disabled, variant = "primary", size = "md", style = {} }) {
+      const sizes = { 
+        sm: { h: 34, px: 16, fs: 12, radius: 8 }, 
+        md: { h: 46, px: 24, fs: 14, radius: 10 }, 
+        lg: { h: 54, px: 32, fs: 15, radius: 12 } 
+      };
+      const variants = {
+        primary: { 
+          bg: "linear-gradient(135deg, #d4af37 0%, #b8960c 100%)", 
+          c: "#0a0a0a", 
+          shadow: "0 4px 16px rgba(212,175,55,0.3)",
+          border: "none"
+        },
+        secondary: { 
+          bg: "transparent", 
+          c: T.tx2, 
+          shadow: "none",
+          border: "1px solid " + T.b2
+        },
+        danger: { 
+          bg: T.errorBg, 
+          c: T.error, 
+          shadow: "none",
+          border: "1px solid " + T.errorBd
+        },
+        ghost: {
+          bg: "rgba(212,175,55,0.08)",
+          c: T.gold,
+          shadow: "none",
+          border: "1px solid " + T.goldBd
+        }
+      };
+      const sz = sizes[size], vr = variants[variant];
+      return (
+        <button onClick={onClick} disabled={disabled} style={{
+          height: sz.h, 
+          padding: `0 ${sz.px}px`, 
+          borderRadius: sz.radius,
+          border: vr.border,
+          background: disabled ? T.raised : vr.bg,
+          color: disabled ? T.tx4 : vr.c,
+          fontSize: sz.fs, 
+          fontWeight: 600, 
+          cursor: disabled ? "not-allowed" : "pointer",
+          fontFamily: ff, 
+          opacity: disabled ? 0.5 : 1, 
+          transition: "all 0.2s ease",
+          boxShadow: disabled ? "none" : vr.shadow,
+          letterSpacing: "0.01em",
+          ...style
+        }}>
+          {children}
+        </button>
+      );
+    }
+
+    function Empty({ icon, title, desc, action }) {
+      return (
+        <div style={{ textAlign: "center", padding: "60px 24px" }}>
+          <div style={{ fontSize: 56, marginBottom: 20, opacity: 0.4, filter: "grayscale(0.3)" }}>{icon}</div>
+          <div style={{ fontSize: 18, fontWeight: 600, color: T.tx3, marginBottom: 10, letterSpacing: "-0.01em" }}>{title}</div>
+          {desc && <div style={{ fontSize: 14, color: T.tx4, marginBottom: 24, lineHeight: 1.6 }}>{desc}</div>}
+          {action}
+        </div>
+      );
+    }
+
+    function Stat({ label, value, sub, color }) {
+      return (
+        <div>
+          <div style={{ fontSize: 11, color: T.tx4, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
+          <div style={{ fontFamily: fm, fontSize: 28, fontWeight: 700, color: color || T.tx, letterSpacing: "-0.02em" }}>{value}</div>
+          {sub && <div style={{ fontSize: 12, color: T.tx4, marginTop: 4 }}>{sub}</div>}
+        </div>
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // NAV BAR
+    // ══════════════════════════════════════════════════════════════════════════
+    function NavBar() {
+      const { wallet, balance, page, setPage, connect, disconnect, loading } = useApp();
+      const { lang, setLang, $ } = useLang();
+      const [showLangMenu, setShowLangMenu] = useState(false);
+
+      const navItems = [
+        { id: "home", labelKey: "nav_insure", icon: "◈" },
+        { id: "policies", labelKey: "nav_policies", icon: "◇" },
+        { id: "claims", labelKey: "nav_claims", icon: "◆" },
+        { id: "wallet", labelKey: "nav_wallet", icon: "○" },
+      ];
+
+      return (
+        <nav style={{ 
+          position: "sticky", top: 0, zIndex: 100, 
+          background: "rgba(8,8,10,0.85)", 
+          backdropFilter: "blur(20px) saturate(1.2)", 
+          borderBottom: "1px solid " + T.b,
+          boxShadow: "0 4px 30px rgba(0,0,0,0.3)"
+        }}>
+          <div style={{ 
+            maxWidth: 1140, margin: "0 auto", height: 64, padding: "0 32px",
+            display: "flex", alignItems: "center", justifyContent: "space-between" 
+          }}>
+            {/* Logo */}
+            <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }} onClick={() => setPage("home")}>
+                <div style={{ 
+                  width: 36, height: 36, borderRadius: 10, 
+                  background: "linear-gradient(135deg, #d4af37 0%, #a08520 100%)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 16, fontWeight: 800, color: "#0a0a0a",
+                  boxShadow: "0 4px 12px rgba(212,175,55,0.3)",
+                  letterSpacing: "-0.05em"
+                }}>CS</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  <span style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-0.02em", color: T.tx }}>ChainSure</span>
+                  <span style={{ fontSize: 10, color: T.gold, letterSpacing: "0.1em", textTransform: "uppercase" }}>{$("brand_sub")}</span>
+                </div>
+              </div>
+              
+              {/* Nav Items */}
+              <div style={{ display: "flex", gap: 4, marginLeft: 16 }}>
+                {navItems.map(item => (
+                  <button key={item.id} onClick={() => setPage(item.id)} style={{
+                    padding: "10px 18px", 
+                    borderRadius: 10, 
+                    border: page === item.id ? "1px solid " + T.goldBd : "1px solid transparent",
+                    background: page === item.id ? T.goldBg : "transparent",
+                    color: page === item.id ? T.gold : T.tx3,
+                    fontSize: 13, 
+                    fontWeight: page === item.id ? 600 : 500,
+                    cursor: "pointer", 
+                    fontFamily: ff, 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: 8,
+                    transition: "all 0.2s ease",
+                    letterSpacing: "0.01em"
+                  }}>
+                    <span style={{ opacity: page === item.id ? 1 : 0.5 }}>{item.icon}</span>
+                    {$(item.labelKey)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Language + Wallet */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {/* Language Switcher */}
+              <div style={{ position: "relative" }}>
+                <button onClick={() => setShowLangMenu(!showLangMenu)} style={{
+                  height: 36, padding: "0 12px", borderRadius: 8,
+                  border: "1px solid " + T.b,
+                  background: "transparent",
+                  color: T.tx2,
+                  fontSize: 13, fontWeight: 500, cursor: "pointer",
+                  fontFamily: ff, display: "flex", alignItems: "center", gap: 6,
+                }}>
+                  <span>{LANGS[lang].flag}</span>
+                  <span style={{ fontSize: 11 }}>{LANGS[lang].code.toUpperCase()}</span>
+                </button>
+                {showLangMenu && (
+                  <div style={{
+                    position: "absolute", top: "100%", right: 0, marginTop: 8,
+                    background: T.panel, border: "1px solid " + T.b,
+                    borderRadius: 12, padding: 6, minWidth: 140,
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                    zIndex: 200
+                  }}>
+                    {Object.values(LANGS).map(l => (
+                      <button key={l.code} onClick={() => { setLang(l.code); setShowLangMenu(false); }} style={{
+                        width: "100%", padding: "10px 14px", borderRadius: 8,
+                        border: "none",
+                        background: lang === l.code ? T.goldBg : "transparent",
+                        color: lang === l.code ? T.gold : T.tx2,
+                        fontSize: 13, fontWeight: lang === l.code ? 600 : 400,
+                        cursor: "pointer", fontFamily: ff,
+                        display: "flex", alignItems: "center", gap: 10,
+                        textAlign: "left"
+                      }}>
+                        <span>{l.flag}</span>
+                        <span>{l.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Balance */}
+              {wallet && (
+                <div style={{ 
+                  display: "flex", alignItems: "center", gap: 8, 
+                  padding: "8px 16px", 
+                  background: "rgba(212,175,55,0.06)", 
+                  border: "1px solid " + T.goldBd,
+                  borderRadius: 10 
+                }}>
+                  <span style={{ fontSize: 15, fontFamily: fm, fontWeight: 600, color: T.gold }}><Anim value={balance} /></span>
+                  <span style={{ fontSize: 11, color: T.tx4, fontWeight: 500 }}>RLO</span>
+                </div>
+              )}
+
+              {/* Wallet Button */}
+              <button onClick={wallet ? () => setPage("wallet") : connect} disabled={loading} style={{
+                height: 40, padding: "0 20px", borderRadius: 10,
+                border: "1px solid " + (wallet ? T.successBd : T.b2),
+                background: wallet ? T.successBg : "rgba(255,255,255,0.03)",
+                color: wallet ? T.success : T.tx2,
+                fontSize: 13, fontWeight: 600, cursor: loading ? "wait" : "pointer",
+                fontFamily: ff, display: "flex", alignItems: "center", gap: 10,
+                transition: "all 0.2s ease"
+              }}>
+                <span style={{ 
+                  width: 8, height: 8, borderRadius: "50%", 
+                  background: wallet ? T.success : T.tx4,
+                  boxShadow: wallet ? "0 0 8px " + T.success : "none"
+                }} />
+                {loading ? $("connecting") : wallet ? shortAddr(wallet) : $("connect_wallet")}
+              </button>
+            </div>
+          </div>
+        </nav>
+      );
+    } 
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // PAGE: HOME (投保)
+    // ══════════════════════════════════════════════════════════════════════════
+    function HomePage() {
+      const { wallet, balance, purchasePolicy, setPage, loading, getTodayPolicyCount, canPurchaseMore } = useApp();
+      const { $, lang } = useLang();
+      const [fi, setFi] = useState(0);
+      const [ti, setTi] = useState(1);
+      const [tab, setTab] = useState("all");
+      const [date, setDate] = useState(() => { 
+        const d = new Date(); d.setDate(d.getDate() + 3); 
+        return d.toISOString().split("T")[0]; 
+      });
+      const [busy, setBusy] = useState(false);
+      const [error, setError] = useState(null);
+
+      const list = tab === "all" ? FLIGHTS : tab === "dom" ? FLIGHTS.filter(f => !f.intl) : FLIGHTS.filter(f => f.intl);
+      const fl = FLIGHTS[fi];
+      const tier = TIERS[ti];
+      const premium = tier.premium;
+      const payout = tier.payout;
+
+      const today = new Date().toISOString().split("T")[0];
+      const tomorrow = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split("T")[0]; })();
+      const canPurchase = date > today;
+      const balanceRLO = Number(balance / KELVIN_PER_RLO);
+      
+      // 每日限额检查
+      const todayCount = getTodayPolicyCount();
+      const canBuyMore = canPurchaseMore();
+
+      const handlePurchase = async () => {
+        if (!wallet || !canPurchase || busy) return;
+        if (!canBuyMore) {
+          setError($("daily_limit_reached", { max: MAX_POLICIES_PER_DAY }));
+          return;
+        }
+        if (balanceRLO < premium) {
+          setError($("insufficient_balance"));
+          return;
+        }
+        setError(null);
+        setBusy(true);
+        try {
+          await purchasePolicy(fl, date, payout, premium);
+          setPage("policies");
+        } catch (e) {
+          // 处理每日限额错误
+          if (e.message.startsWith("DAILY_LIMIT:")) {
+            setError($("daily_limit_reached", { max: MAX_POLICIES_PER_DAY }));
+          } else {
+            setError(e.message);
+          }
+        }
+        setBusy(false);
+      };
+
+      // 日期格式化
+      const formatDate = (dateStr) => {
+        const d = new Date(dateStr);
+        if (lang === 'zh') {
+          const dp = dateStr.split("-");
+          const wk = ["日","一","二","三","四","五","六"][d.getDay()];
+          return `${dp[0]}年${+dp[1]}月${+dp[2]}日 周${wk}`;
+        } else if (lang === 'ja') {
+          const dp = dateStr.split("-");
+          const wk = ["日","月","火","水","木","金","土"][d.getDay()];
+          return `${dp[0]}年${+dp[1]}月${+dp[2]}日 (${wk})`;
+        } else if (lang === 'ko') {
+          const dp = dateStr.split("-");
+          const wk = ["일","월","화","수","목","금","토"][d.getDay()];
+          return `${dp[0]}년 ${+dp[1]}월 ${+dp[2]}일 (${wk})`;
+        } else {
+          return d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        }
+      };
+
+      return (
+        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "40px 32px" }}>
+          {/* 产品线选择 */}
+          <div style={{ display: "flex", gap: 12, marginBottom: 36 }}>
+            {PRODUCTS.map(p => (
+              <div key={p.id} style={{
+                padding: "14px 24px", 
+                borderRadius: 14,
+                background: p.active 
+                  ? "linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(180,140,50,0.06) 100%)" 
+                  : "rgba(20,20,25,0.6)",
+                border: "1px solid " + (p.active ? T.goldBd : T.b),
+                opacity: p.active ? 1 : 0.4,
+                cursor: p.active ? "pointer" : "not-allowed",
+                display: "flex", alignItems: "center", gap: 12,
+                transition: "all 0.25s ease",
+                boxShadow: p.active ? "0 4px 20px rgba(212,175,55,0.1)" : "none"
+              }}>
+                <span style={{ fontSize: 22, filter: p.active ? "none" : "grayscale(1)" }}>{p.icon}</span>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: p.active ? T.gold : T.tx4, letterSpacing: "-0.01em" }}>{$(p.labelKey)}</div>
+                  <div style={{ fontSize: 10, color: T.tx4, marginTop: 2, letterSpacing: "0.02em" }}>ChainSure {p.name}</div>
+                </div>
+                {!p.active && <Badge variant="default">{$("coming_soon")}</Badge>}
+              </div>
+            ))}
+          </div>
+
+          {/* Header */}
+          <div style={{ marginBottom: 40 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+              <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.02em", color: T.tx }}>{$("page_title")}</h1>
+              <Badge variant="gold">{$("smart_contract")}</Badge>
+            </div>
+            <p style={{ fontSize: 15, color: T.tx3, lineHeight: 1.7, maxWidth: 500 }}>
+              {$("page_desc", { threshold: DELAY_THRESHOLD })}
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: 28 }}>
+            {/* Left: Selection */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              {/* Flight List */}
+              <Card>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: T.tx2, letterSpacing: "-0.01em" }}>{$("select_flight")}</span>
+                  <div style={{ display: "flex", gap: 4, background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: 3 }}>
+                    {[["all","filter_all"],["dom","filter_domestic"],["intl","filter_international"]].map(([k,lbKey]) => (
+                      <button key={k} onClick={() => setTab(k)} style={{ 
+                        padding: "6px 14px", borderRadius: 6, border: "none",
+                        background: tab === k ? T.goldBg : "transparent",
+                        color: tab === k ? T.gold : T.tx4,
+                        fontSize: 12, fontWeight: tab === k ? 600 : 500, cursor: "pointer", fontFamily: ff,
+                        transition: "all 0.2s ease"
+                      }}>{$(lbKey)}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 340, overflowY: "auto", paddingRight: 4 }}>
+                  {list.map(f => {
+                    const idx = FLIGHTS.indexOf(f);
+                    const sel = fi === idx;
+                    const delayed = f.dep_delayed >= DELAY_THRESHOLD;
+                    return (
+                      <div key={f.id} onClick={() => setFi(idx)} style={{
+                        padding: "16px 18px", 
+                        borderRadius: 12, 
+                        cursor: "pointer",
+                        border: "1px solid " + (sel ? T.goldBd : "rgba(255,255,255,0.04)"),
+                        background: sel 
+                          ? "linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(20,20,25,0.9) 100%)" 
+                          : "rgba(255,255,255,0.02)",
+                        transition: "all 0.2s ease",
+                        boxShadow: sel ? "0 2px 12px rgba(212,175,55,0.1)" : "none"
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <span style={{ 
+                              fontFamily: fm, fontSize: 15, fontWeight: 700, 
+                              color: sel ? T.gold : T.tx2,
+                              letterSpacing: "-0.01em"
+                            }}>{f.iata}</span>
+                            <span style={{ fontSize: 12, color: T.tx4 }}>{f.airline.name}</span>
+                            {f.intl && <Badge variant="info">{$("intl_badge")}</Badge>}
+                          </div>
+                          <Badge variant={delayed ? "warning" : "success"}>
+                            {delayed ? $("delay_badge", { min: f.dep_delayed }) : $("ontime_badge")}
+                          </Badge>
+                        </div>
+                        <div style={{ fontSize: 12, color: T.tx4, marginTop: 10, display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{ fontFamily: fm, color: sel ? T.tx2 : T.tx4 }}>{f.dep.iata}</span>
+                          <span style={{ color: T.gold, fontSize: 10 }}>━━✈</span>
+                          <span style={{ fontFamily: fm, color: sel ? T.tx2 : T.tx4 }}>{f.arr.iata}</span>
+                          <span style={{ marginLeft: "auto", fontFamily: fm }}>{f.dep.scheduled}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+
+              {/* Date Selection */}
+              <Card>
+                <span style={{ fontSize: 14, fontWeight: 600, color: T.tx2, display: "block", marginBottom: 14, letterSpacing: "-0.01em" }}>{$("select_date")}</span>
+                <div style={{ display: "flex", gap: 12 }}>
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)} min={tomorrow} style={{
+                    flex: 1, padding: "14px 16px", borderRadius: 10, border: "1px solid " + T.b2,
+                    background: "rgba(0,0,0,0.3)", color: T.tx, fontSize: 14, fontFamily: fm,
+                    outline: "none", transition: "all 0.2s ease"
+                  }} />
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[["tomorrow",1],["day_after",2],["plus_7_days",7]].map(([lbKey,off]) => {
+                      const d = new Date(); d.setDate(d.getDate()+off);
+                      const v = d.toISOString().split("T")[0];
+                      const s = date === v;
+                      return (
+                        <button key={lbKey} onClick={() => setDate(v)} style={{
+                          padding: "10px 14px", borderRadius: 8, 
+                          border: "1px solid " + (s ? T.goldBd : T.b),
+                          background: s ? T.goldBg : "transparent", 
+                          color: s ? T.gold : T.tx4,
+                          fontSize: 12, fontWeight: s ? 600 : 500, cursor: "pointer", fontFamily: ff,
+                          transition: "all 0.2s ease"
+                        }}>{$(lbKey)}</button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div style={{ marginTop: 10, fontSize: 13, color: canPurchase ? T.tx3 : T.error }}>
+                  {formatDate(date)} · {fl.dep.scheduled}
+                  {!canPurchase && <span style={{ marginLeft: 8 }}>⚠️ {$("select_future_date")}</span>}
+                </div>
+              </Card>
+
+              {/* Tier Selection */}
+              <Card>
+                <span style={{ fontSize: 13, fontWeight: 600, color: T.tx2, display: "block", marginBottom: 12 }}>{$("select_plan")}</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {TIERS.map((tier, i) => {
+                    const sel = ti === i;
+                    return (
+                      <button key={i} onClick={() => setTi(i)} style={{
+                        padding: "16px 20px", borderRadius: 10, 
+                        border: "1px solid " + (sel ? T.goldBd : T.b),
+                        background: sel ? T.goldBg : "transparent", 
+                        cursor: "pointer", textAlign: "left",
+                        display: "flex", justifyContent: "space-between", alignItems: "center"
+                      }}>
+                        <div>
+                          <div style={{ fontSize: 12, color: T.tx4, marginBottom: 4 }}>{$(tier.nameKey)}</div>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                            <span style={{ fontSize: 11, color: T.tx4 }}>{$("premium_label")}</span>
+                            <span style={{ fontFamily: fm, fontSize: 18, fontWeight: 700, color: sel ? T.w : T.tx2 }}>{n(tier.premium)}</span>
+                            <span style={{ fontSize: 11, color: T.tx4 }}>RLO</span>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ fontSize: 11, color: T.gold, marginBottom: 4 }}>{$("payout_label", { threshold: DELAY_THRESHOLD })}</div>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: 4, justifyContent: "flex-end" }}>
+                            <span style={{ fontFamily: fm, fontSize: 20, fontWeight: 700, color: sel ? T.gold : T.tx3 }}>+{n(tier.payout)}</span>
+                            <span style={{ fontSize: 11, color: T.tx4 }}>RLO</span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* 费率说明 */}
+                <div style={{ marginTop: 12, padding: "10px 14px", background: T.bg, borderRadius: 8, fontSize: 12, color: T.tx4 }}>
+                  💡 {$("rate_hint", { rate: tier.rate, premium: n(premium), payout: n(payout) })}
+                </div>
+              </Card>
+            </div>
+
+            {/* Right: Summary & Action */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Flight Card */}
+              <Card style={{ background: T.raised }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <div style={{ fontFamily: fm, fontSize: 28, fontWeight: 700 }}>{fl.iata}</div>
+                    <div style={{ fontSize: 13, color: T.tx3, marginTop: 4 }}>{fl.airline.name}</div>
+                  </div>
+                  <Badge variant={fl.dep_delayed >= DELAY_THRESHOLD ? "warning" : "success"}>
+                    {fl.dep_delayed >= DELAY_THRESHOLD ? $("delay_badge", { min: fl.dep_delayed }) : $("ontime_badge")}
+                  </Badge>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", marginTop: 20, padding: "16px 0", borderTop: "1px solid " + T.b }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 10, color: T.tx4, textTransform: "uppercase" }}>DEP</div>
+                    <div style={{ fontFamily: fm, fontSize: 20, fontWeight: 700, marginTop: 4 }}>{fl.dep.iata}</div>
+                    <div style={{ fontSize: 12, color: T.tx3 }}>{fl.dep.city}</div>
+                  </div>
+                  <div style={{ padding: "0 16px", color: T.gold }}>✈️</div>
+                  <div style={{ flex: 1, textAlign: "right" }}>
+                    <div style={{ fontSize: 10, color: T.tx4, textTransform: "uppercase" }}>ARR</div>
+                    <div style={{ fontFamily: fm, fontSize: 20, fontWeight: 700, marginTop: 4 }}>{fl.arr.iata}</div>
+                    <div style={{ fontSize: 12, color: T.tx3 }}>{fl.arr.city}</div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Policy Summary */}
+              <Card>
+                <span style={{ fontSize: 13, fontWeight: 600, color: T.tx2, display: "block", marginBottom: 16 }}>{$("order_confirm")}</span>
+                
+                {/* 核心信息：保费 vs 赔付 */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+                  <div style={{ padding: "16px", background: T.bg, borderRadius: 10, textAlign: "center" }}>
+                    <div style={{ fontSize: 11, color: T.tx4, marginBottom: 6 }}>{$("you_pay")}</div>
+                    <div style={{ fontFamily: fm, fontSize: 28, fontWeight: 700, color: T.tx }}>{n(premium)}</div>
+                    <div style={{ fontSize: 11, color: T.tx4 }}>RLO</div>
+                  </div>
+                  <div style={{ padding: "16px", background: T.goldBg, border: "1px solid " + T.goldBd, borderRadius: 10, textAlign: "center" }}>
+                    <div style={{ fontSize: 11, color: T.gold, marginBottom: 6 }}>{$("you_get")}</div>
+                    <div style={{ fontFamily: fm, fontSize: 28, fontWeight: 700, color: T.gold }}>+{n(payout)}</div>
+                    <div style={{ fontSize: 11, color: T.gold }}>RLO</div>
+                  </div>
+                </div>
+
+                {/* 详细信息 */}
+                <div style={{ fontSize: 12, color: T.tx4, marginBottom: 12 }}>{$("policy_details")}</div>
+                {[
+                  [$("flight_label"), fl.iata],
+                  [$("route_label"), `${fl.dep.iata} → ${fl.arr.iata}`],
+                  [$("date_label"), `${date} ${fl.dep.scheduled}`],
+                  [$("condition_label"), $("delay_condition", { threshold: DELAY_THRESHOLD })],
+                ].map(([k, v]) => (
+                  <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 8 }}>
+                    <span style={{ color: T.tx4 }}>{k}</span>
+                    <span style={{ fontFamily: fm, color: T.tx2 }}>{v}</span>
+                  </div>
+                ))}
+
+                {/* 回报率提示 */}
+                <div style={{ marginTop: 12, padding: "10px 14px", background: T.goldBg, border: "1px solid " + T.goldBd, borderRadius: 8, fontSize: 12 }}>
+                  <span style={{ color: T.tx3 }}>💰 {$("return_rate", { premium: n(premium), payout: n(payout), multiplier: Math.round(payout / premium) })}</span>
+                </div>
+              </Card>
+
+              {/* Action */}
+              {error && (
+                <div style={{ padding: "12px 16px", borderRadius: 10, background: T.errorBg, border: "1px solid " + T.errorBd, color: T.error, fontSize: 13 }}>
+                  {error}
+                </div>
+              )}
+
+              {!wallet ? (
+                <Card style={{ background: T.goldBg, border: "1px solid " + T.goldBd, textAlign: "center" }}>
+                  <span style={{ color: T.tx3, fontSize: 14 }}>{$("connect_first")}</span>
+                </Card>
+              ) : !canPurchase ? (
+                <Card style={{ background: T.errorBg, border: "1px solid " + T.errorBd, textAlign: "center" }}>
+                  <span style={{ color: T.error, fontSize: 14 }}>{$("future_date_only")}</span>
+                </Card>
+              ) : !canBuyMore ? (
+                <Card style={{ background: T.errorBg, border: "1px solid " + T.errorBd, textAlign: "center" }}>
+                  <span style={{ color: T.error, fontSize: 14 }}>{$("daily_limit_reached", { max: MAX_POLICIES_PER_DAY })}</span>
+                </Card>
+              ) : (
+                <>
+                  <Button onClick={handlePurchase} disabled={busy || balanceRLO < premium} size="lg" style={{ width: "100%" }}>
+                    {busy ? $("processing") : $("confirm_pay", { amount: n(premium) })}
+                  </Button>
+                  {/* 每日限额提示 */}
+                  {wallet && (
+                    <div style={{ 
+                      fontSize: 12, color: todayCount >= MAX_POLICIES_PER_DAY - 1 ? T.warn : T.tx4, 
+                      textAlign: "center", marginTop: 8 
+                    }}>
+                      {$("daily_limit_hint", { count: todayCount, max: MAX_POLICIES_PER_DAY })}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Contract Info */}
+              <div style={{ fontSize: 11, color: T.tx4, textAlign: "center", padding: "8px 0" }}>
+                ChainSure Flight · <span style={{ fontFamily: fm }}>{shortAddr(PROGRAM_ID)}</span> · Rialo Devnet
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // PAGE: POLICIES (保单列表)
+    // ══════════════════════════════════════════════════════════════════════════
+    function PoliciesPage() {
+      const { wallet, policies, settlePolicy, setPage } = useApp();
+      const { $ } = useLang();
+      const [settling, setSettling] = useState(null);
+
+      const today = new Date().toISOString().split("T")[0];
+
+      const handleSettle = async (policy) => {
+        setSettling(policy.address);
+        try {
+          await settlePolicy(policy);
+        } catch (e) {
+          console.error(e);
+        }
+        setSettling(null);
+      };
+
+      if (!wallet) {
+        return (
+          <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
+            <Card>
+              <Empty icon="🔒" title={$("connect_first")} />
+            </Card>
+          </div>
+        );
+      }
+
+      const active = policies.filter(p => p.status === PolicyStatus.Active);
+      const history = policies.filter(p => p.status !== PolicyStatus.Active);
+
+      return (
+        <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+            <h1 style={{ fontSize: 26, fontWeight: 700 }}>{$("my_policies")}</h1>
+            <Badge>{$("policies_count", { count: policies.length })}</Badge>
+          </div>
+
+          {policies.length === 0 ? (
+            <Card>
+              <Empty 
+                icon="📋" 
+                title={$("no_policies")}
+                desc={$("no_policies_desc")}
+                action={<Button onClick={() => setPage("home")}>{$("go_insure")}</Button>}
+              />
+            </Card>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Active Policies */}
+              {active.length > 0 && (
+                <>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: T.tx4, textTransform: "uppercase" }}>
+                    {$("active_policies")} ({active.length})
+                  </div>
+                  {active.map(p => {
+                    const canSettle = p.date <= today;
+                    const isSettling = settling === p.address;
+                    const payoutRLO = Number(p.payoutAmount / KELVIN_PER_RLO);
+                    return (
+                      <Card key={p.address}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontFamily: fm, fontSize: 20, fontWeight: 700 }}>{p.flightIata}</span>
+                              <Badge variant="success">{$("policy_active")}</Badge>
+                            </div>
+                            <div style={{ fontSize: 13, color: T.tx3, marginTop: 6 }}>
+                              {p.depAirport} → {p.arrAirport}
+                            </div>
+                            <div style={{ fontSize: 12, color: T.tx4, marginTop: 2 }}>
+                              {p.date} {p.scheduledDeparture}
+                            </div>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontSize: 11, color: T.tx4 }}>{$("you_get")}</div>
+                            <div style={{ fontFamily: fm, fontSize: 20, fontWeight: 700 }}>
+                              {n(payoutRLO)} <span style={{ fontSize: 11, color: T.tx4 }}>RLO</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid " + T.b, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ fontSize: 12, color: T.tx4 }}>
+                            {canSettle ? "✅ " + $("can_settle") : "⏰ " + $("waiting_flight", { date: p.date })}
+                          </div>
+                          {canSettle ? (
+                            <Button onClick={() => handleSettle(p)} disabled={isSettling} size="sm">
+                              {isSettling ? $("settling") : $("settle_now")}
+                            </Button>
+                          ) : (
+                            <Badge>{$("waiting")}</Badge>
+                          )}
+                        </div>
+                        <div style={{ marginTop: 12, fontSize: 11, color: T.tx4, fontFamily: fm }}>
+                          PDA: {shortAddr(p.address)} · TX: {shortSig(p.txSignature)}
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </>
+              )}
+
+              {/* History */}
+              {history.length > 0 && (
+                <>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: T.tx4, textTransform: "uppercase", marginTop: 16 }}>
+                    {$("history_policies")} ({history.length})
+                  </div>
+                  {history.map(p => {
+                    const payoutRLO = Number(p.payoutAmount / KELVIN_PER_RLO);
+                    const isClaimed = p.status === PolicyStatus.Claimed;
+                    return (
+                      <Card key={p.address} style={{ opacity: 0.7 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <span style={{ fontFamily: fm, fontSize: 16, fontWeight: 600 }}>{p.flightIata}</span>
+                            <span style={{ fontSize: 12, color: T.tx4 }}>{p.date}</span>
+                            <Badge variant={isClaimed ? "success" : "error"}>
+                              {isClaimed ? `${$("claimed")} +${n(payoutRLO)}` : `${$("expired")} (${$("delay_min", { min: p.actualDelayMinutes })})`}
+                            </Badge>
+                          </div>
+                          <div style={{ fontSize: 12, color: T.tx4 }}>{p.depAirport} → {p.arrAirport}</div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // PAGE: CLAIMS (理赔记录)
+    // ══════════════════════════════════════════════════════════════════════════
+    function ClaimsPage() {
+      const { wallet, claims, setPage } = useApp();
+      const { $ } = useLang();
+
+      if (!wallet) {
+        return (
+          <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
+            <Card>
+              <Empty icon="🔒" title={$("connect_first")} />
+            </Card>
+          </div>
+        );
+      }
+
+      const totalClaimed = claims.reduce((sum, c) => sum + Number(c.amount / KELVIN_PER_RLO), 0);
+
+      return (
+        <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
+          <h1 style={{ fontSize: 26, fontWeight: 700, marginBottom: 24 }}>{$("claims_title")}</h1>
+
+          {claims.length === 0 ? (
+            <Card>
+              <Empty 
+                icon="💰" 
+                title={$("no_claims")}
+                desc={$("no_claims_desc", { threshold: DELAY_THRESHOLD })}
+                action={<Button onClick={() => setPage("home")}>{$("go_insure")}</Button>}
+              />
+            </Card>
+          ) : (
+            <>
+              {/* Total */}
+              <Card style={{ marginBottom: 24, background: T.goldBg, border: "1px solid " + T.goldBd }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Stat label={$("total_claimed")} value={`+${n(totalClaimed)}`} sub="RLO" color={T.gold} />
+                  <div style={{ fontSize: 48, opacity: 0.3 }}>💰</div>
+                </div>
+              </Card>
+
+              {/* List */}
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.tx4, textTransform: "uppercase", marginBottom: 12 }}>
+                {$("claim_details")} ({claims.length})
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {claims.map(c => {
+                  const amountRLO = Number(c.amount / KELVIN_PER_RLO);
+                  return (
+                    <Card key={c.address}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <span style={{ fontFamily: fm, fontSize: 16, fontWeight: 700 }}>
+                              {c.policy.split("_")[2]}
+                            </span>
+                            <Badge variant="warning">{$("delay_min", { min: c.delayMinutes })}</Badge>
+                          </div>
+                          <div style={{ fontSize: 12, color: T.tx4, marginTop: 6 }}>
+                            {new Date(c.timestamp).toLocaleString()}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ fontFamily: fm, fontSize: 22, fontWeight: 700, color: T.gold }}>+{n(amountRLO)}</div>
+                          <div style={{ fontSize: 11, color: T.tx4 }}>RLO</div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, fontSize: 11, color: T.tx4, fontFamily: fm }}>
+                        TX: {shortSig(c.transferSignature)}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // PAGE: WALLET (钱包)
+    // ══════════════════════════════════════════════════════════════════════════
+    function WalletPage() {
+      const { wallet, balance, txHistory, connect, disconnect, loading } = useApp();
+      const { $ } = useLang();
+
+      if (!wallet) {
+        return (
+          <div style={{ maxWidth: 500, margin: "0 auto", padding: "32px 24px" }}>
+            <Card style={{ textAlign: "center", padding: "48px 32px" }}>
+              <div style={{ fontSize: 64, marginBottom: 24 }}>👛</div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>{$("connect_wallet")}</h2>
+              <p style={{ fontSize: 14, color: T.tx3, marginBottom: 24 }}>Rialo Wallet → ChainSure</p>
+              <Button onClick={connect} disabled={loading} size="lg">
+                {loading ? $("connecting") : $("connect_wallet")}
+              </Button>
+            </Card>
+          </div>
+        );
+      }
+
+      const balanceRLO = Number(balance / KELVIN_PER_RLO);
+
+      return (
+        <div style={{ maxWidth: 600, margin: "0 auto", padding: "32px 24px" }}>
+          <h1 style={{ fontSize: 26, fontWeight: 700, marginBottom: 24 }}>{$("wallet_title")}</h1>
+
+          {/* Balance Card */}
+          <Card style={{ marginBottom: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <Stat label={$("balance")} value={<Anim value={balance} />} sub="RLO" />
+              <Badge variant="success">{$("connected")}</Badge>
+            </div>
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid " + T.b }}>
+              <div style={{ fontSize: 11, color: T.tx4, marginBottom: 6 }}>{$("address")}</div>
+              <div style={{ fontFamily: fm, fontSize: 13, color: T.tx2, wordBreak: "break-all" }}>{wallet}</div>
+            </div>
+            <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
+              <Button onClick={disconnect} variant="danger" size="sm">{$("disconnect")}</Button>
+            </div>
+          </Card>
+
+          {/* Transaction History */}
+          <div style={{ fontSize: 12, fontWeight: 600, color: T.tx4, textTransform: "uppercase", marginBottom: 12 }}>
+            {$("tx_history")}
+          </div>
+          {txHistory.length === 0 ? (
+            <Card>
+              <Empty icon="📝" title={$("no_tx")} />
+            </Card>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {txHistory.map((tx, i) => (
+                <Card key={i} style={{ padding: "14px 18px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <span style={{ fontSize: 20 }}>
+                        {tx.type === "connect" ? "🔗" : tx.type === "disconnect" ? "🔌" : tx.type === "purchase" ? "🛡️" : tx.type === "claim" ? "💰" : "📋"}
+                      </span>
+                      <div>
+                        <div style={{ fontSize: 13, color: T.tx }}>{tx.desc}</div>
+                        <div style={{ fontSize: 11, color: T.tx4, marginTop: 2 }}>
+                          {new Date(tx.time).toLocaleString()}
+                          {tx.signature && <span style={{ marginLeft: 8, fontFamily: fm }}>{shortSig(tx.signature)}</span>}
+                        </div>
+                      </div>
+                    </div>
+                    {tx.amount !== undefined && tx.amount !== 0 && (
+                      <div style={{ fontFamily: fm, fontSize: 14, fontWeight: 600, color: tx.amount > 0 ? T.gold : T.error }}>
+                        {tx.amount > 0 ? "+" : ""}{n(tx.amount)} RLO
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Network Info */}
+          <div style={{ marginTop: 24, padding: "16px", background: T.raised, borderRadius: 10, fontSize: 12, color: T.tx4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span>{$("protocol")}</span>
+              <span style={{ color: T.tx2 }}>ChainSure Protocol</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span>{$("network")}</span>
+              <span style={{ color: T.tx2 }}>Rialo Devnet</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>{$("contract")}</span>
+              <span style={{ fontFamily: fm, color: T.tx2 }}>{shortAddr(PROGRAM_ID)}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // APP
+    // ══════════════════════════════════════════════════════════════════════════
+    function App() {
+      const { page } = useApp();
+      const { lang } = useLang();
+      
+      return (
+        <div style={{ minHeight: "100vh", background: T.bg, color: T.tx, fontFamily: ff }}>
+          <NavBar />
+          {page === "home" && <HomePage />}
+          {page === "policies" && <PoliciesPage />}
+          {page === "claims" && <ClaimsPage />}
+          {page === "wallet" && <WalletPage />}
+        </div>
+      );
+    }
+
+    function LangProvider({ children }) {
+      const [lang, setLang] = useState(() => {
+        // 尝试从浏览器获取语言
+        const browserLang = navigator.language.split('-')[0];
+        return ['zh', 'en', 'ja', 'ko'].includes(browserLang) ? browserLang : 'zh';
+      });
+      
+      const $ = (key, params) => t(lang, key, params);
+      
+      return (
+        <LangContext.Provider value={{ lang, setLang, $ }}>
+          {children}
+        </LangContext.Provider>
+      );
+    }
+
+    function Root() {
+      return (
+        <LangProvider>
+          <AppProvider>
+            <App />
+          </AppProvider>
+        </LangProvider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<Root />);
+  </script>
+</body>
+</html>
