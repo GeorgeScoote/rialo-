@@ -122,8 +122,5 @@ chainsure-project/
 
 Feel free to reach out:
 
-- Open a [GitHub Discussion](https://github.com/chainsure/protocol/discussions)
-- Join our [Discord](https://discord.gg/chainsure)
-- Email us at dev@chainsure.app
 
 Thank you for contributing! 🙏
