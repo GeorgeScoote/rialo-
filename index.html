@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChainSure - 链上保险协议</title>
+  <title>ChainSure - On-Chain Insurance Protocol</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -37,39 +37,39 @@
     const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
 
     // ══════════════════════════════════════════════════════════════════════════
-    // THEME - 深色奢华金
+    // THEME - Dark Luxury Gold
     // ══════════════════════════════════════════════════════════════════════════
     const T = {
-      // 背景层次
+      // Background layers
       bg: "#08080a", 
       panel: "rgba(18,18,22,0.8)", 
       raised: "rgba(28,28,35,0.9)",
       card: "linear-gradient(145deg, rgba(22,22,28,0.95) 0%, rgba(15,15,18,0.98) 100%)",
       
-      // 边框层次
+      // Border layers
       b: "rgba(212,175,55,0.08)", 
       b2: "rgba(212,175,55,0.15)",
       b3: "rgba(212,175,55,0.25)",
       
-      // 文字层次
+      // Text layers
       tx: "#f8f6f0", 
       tx2: "#c4b998", 
       tx3: "#8a8270", 
       tx4: "#5c5a52",
       
-      // 主色 - 金色系
+      // Primary - Gold
       gold: "#d4af37",
       goldLight: "#e8c547",
       goldDark: "#b8960c",
       goldBg: "rgba(212,175,55,0.08)",
       goldBd: "rgba(212,175,55,0.2)",
       
-      // 强调白
+      // Accent white
       w: "#fffef8", 
       wBg: "rgba(255,254,248,0.05)", 
       wBd: "rgba(255,254,248,0.12)",
       
-      // 状态色
+      // Status colors
       success: "#7dd87d",
       successBg: "rgba(125,216,125,0.1)",
       successBd: "rgba(125,216,125,0.25)",
@@ -83,16 +83,16 @@
       warnBd: "rgba(212,175,55,0.25)",
     };
     
-    // 字体
-    const ff = "'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans JP', 'Noto Sans KR', sans-serif";
+    // Fonts
+    const ff = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
     const fm = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
 
     // ══════════════════════════════════════════════════════════════════════════
     // INTERNATIONALIZATION (i18n)
     // ══════════════════════════════════════════════════════════════════════════
     const LANGS = {
-      zh: { code: "zh", name: "中文", flag: "🇨🇳" },
       en: { code: "en", name: "English", flag: "🇺🇸" },
+      zh: { code: "zh", name: "中文", flag: "🇨🇳" },
       ja: { code: "ja", name: "日本語", flag: "🇯🇵" },
       ko: { code: "ko", name: "한국어", flag: "🇰🇷" },
     };
@@ -106,16 +106,21 @@
         nav_wallet: "钱包",
         
         // Header
-        brand_sub: "航班保险",
+        brand_sub: "保险协议",
         page_title: "航班延误保障",
+        page_title_logistics: "物流货运保障",
+        page_title_auto: "车辆保险",
         page_desc: "选择您的航班和保障方案，延误超过 {threshold} 分钟将自动触发链上理赔",
+        page_desc_logistics: "智能合约保障您的包裹安全，丢失或损坏自动理赔",
+        page_desc_auto: "全面车辆保障，链上即时理赔处理",
         smart_contract: "智能合约",
         
         // Products
-        product_flight: "航班延误",
-        product_health: "医疗保障",
-        product_auto: "车辆保险",
-        product_life: "人寿保险",
+        product_flight: "航班",
+        product_logistics: "物流",
+        product_health: "医疗",
+        product_auto: "车险",
+        product_life: "寿险",
         coming_soon: "即将上线",
         
         // Flight Selection
@@ -126,6 +131,28 @@
         intl_badge: "国际",
         delay_badge: "延误 {min}m",
         ontime_badge: "准点率高",
+        
+        // Logistics
+        select_package: "选择包裹类型",
+        package_standard: "标准件",
+        package_express: "快递",
+        package_fragile: "易碎品",
+        package_value: "贵重物品",
+        carrier_label: "承运商",
+        tracking_label: "运单号",
+        coverage_lost: "丢件赔付",
+        coverage_damage: "破损赔付",
+        coverage_delay: "超时赔付",
+        
+        // Auto
+        select_vehicle: "选择车辆类型",
+        vehicle_sedan: "轿车",
+        vehicle_suv: "SUV",
+        vehicle_truck: "货车",
+        vehicle_motorcycle: "摩托车",
+        coverage_collision: "碰撞险",
+        coverage_theft: "盗抢险",
+        coverage_liability: "责任险",
         
         // Date
         select_date: "出发日期",
@@ -142,7 +169,7 @@
         plan_vip: "尊享",
         premium_label: "保费",
         payout_label: "延误≥{threshold}分钟赔付",
-        rate_hint: "费率 {rate}%：支付 {premium} RLO，延误可获赔 {payout} RLO",
+        rate_hint: "费率 {rate}%：支付 {premium} ETH，延误可获赔 {payout} ETH",
         
         // Order
         order_confirm: "订单确认",
@@ -159,7 +186,7 @@
         // Actions
         connect_wallet: "连接钱包",
         connecting: "连接中...",
-        confirm_pay: "确认支付 {amount} RLO",
+        confirm_pay: "确认支付 {amount} ETH",
         processing: "处理中...",
         connect_first: "请先连接钱包",
         future_date_only: "只能购买未来日期的航班保险",
@@ -211,6 +238,35 @@
         protocol: "协议",
         network: "网络",
         contract: "合约",
+        
+        // Demo & Settlement Steps
+        demo_title: "演示赔付流程",
+        demo_desc: "点击下方按钮，一键体验完整的航班延误自动理赔流程",
+        demo_desc2: "包括：查询航班 → 验证延误 → 触发理赔 → 自动到账",
+        demo_start: "开始演示",
+        demo_btn: "一键演示赔付流程",
+        demo_purchased: "购买 {flight} 保险 (演示)",
+        
+        settle_step1: "发起结算请求...",
+        settle_step2: "正在查询 {flight} 航班数据...",
+        settle_step3: "航班延误 {min} 分钟，验证理赔条件...",
+        settle_step4_hit: "触发理赔，转账中...",
+        settle_step4_miss: "未达理赔条件，更新状态...",
+        settle_step5_hit: "理赔成功！{amount} ETH 已到账",
+        settle_step5_miss: "保单已结算，未触发理赔",
+        
+        settle_title_processing: "正在结算...",
+        settle_title_success: "理赔成功",
+        settle_title_done: "结算完成",
+        settle_preparing: "准备中...",
+        settle_condition_met: "触发理赔条件，已自动打款",
+        settle_condition_not_met: "未达理赔条件，保单已结算",
+        
+        step_request: "发起请求",
+        step_query: "查询航班",
+        step_verify: "验证条件",
+        step_execute: "链上执行",
+        step_complete: "完成",
       },
       
       en: {
@@ -219,17 +275,23 @@
         nav_claims: "Claims",
         nav_wallet: "Wallet",
         
-        brand_sub: "Flight Insurance",
+        brand_sub: "Insurance Protocol",
         page_title: "Flight Delay Protection",
+        page_title_logistics: "Logistics Insurance",
+        page_title_auto: "Auto Insurance",
         page_desc: "Select your flight and coverage plan. Claims are automatically triggered on-chain when delays exceed {threshold} minutes",
+        page_desc_logistics: "Protect your packages with smart contract coverage. Automatic claims for lost or damaged shipments",
+        page_desc_auto: "Comprehensive vehicle protection with instant on-chain claims processing",
         smart_contract: "Smart Contract",
         
-        product_flight: "Flight Delay",
+        product_flight: "Flight",
+        product_logistics: "Logistics",
         product_health: "Health",
         product_auto: "Auto",
         product_life: "Life",
         coming_soon: "Soon",
         
+        // Flight
         select_flight: "Select Flight",
         filter_all: "All",
         filter_domestic: "Domestic",
@@ -237,6 +299,28 @@
         intl_badge: "Int'l",
         delay_badge: "Delay {min}m",
         ontime_badge: "On-time",
+        
+        // Logistics
+        select_package: "Select Package",
+        package_standard: "Standard",
+        package_express: "Express",
+        package_fragile: "Fragile",
+        package_value: "High Value",
+        carrier_label: "Carrier",
+        tracking_label: "Tracking",
+        coverage_lost: "Lost Package",
+        coverage_damage: "Damage",
+        coverage_delay: "Delay >3 days",
+        
+        // Auto
+        select_vehicle: "Select Vehicle",
+        vehicle_sedan: "Sedan",
+        vehicle_suv: "SUV",
+        vehicle_truck: "Truck",
+        vehicle_motorcycle: "Motorcycle",
+        coverage_collision: "Collision",
+        coverage_theft: "Theft",
+        coverage_liability: "Liability",
         
         select_date: "Departure Date",
         tomorrow: "Tomorrow",
@@ -251,7 +335,7 @@
         plan_vip: "VIP",
         premium_label: "Premium",
         payout_label: "Payout if delay ≥{threshold}min",
-        rate_hint: "Rate {rate}%: Pay {premium} RLO, get {payout} RLO if delayed",
+        rate_hint: "Rate {rate}%: Pay {premium} ETH, get {payout} ETH if delayed",
         
         order_confirm: "Order Confirmation",
         you_pay: "You Pay",
@@ -266,7 +350,7 @@
         
         connect_wallet: "Connect Wallet",
         connecting: "Connecting...",
-        confirm_pay: "Confirm Payment {amount} RLO",
+        confirm_pay: "Confirm Payment {amount} ETH",
         processing: "Processing...",
         connect_first: "Please connect wallet first",
         future_date_only: "Can only purchase for future flights",
@@ -314,6 +398,35 @@
         protocol: "Protocol",
         network: "Network",
         contract: "Contract",
+        
+        // Demo & Settlement Steps
+        demo_title: "Demo Claim Process",
+        demo_desc: "Click below to experience the complete automatic flight delay claim process",
+        demo_desc2: "Including: Query Flight → Verify Delay → Trigger Claim → Auto Payout",
+        demo_start: "Start Demo",
+        demo_btn: "Demo Claim Process",
+        demo_purchased: "Purchased {flight} insurance (Demo)",
+        
+        settle_step1: "Initiating settlement...",
+        settle_step2: "Querying {flight} flight data...",
+        settle_step3: "Flight delayed {min} min, verifying claim conditions...",
+        settle_step4_hit: "Claim triggered, transferring...",
+        settle_step4_miss: "Conditions not met, updating status...",
+        settle_step5_hit: "Claim successful! {amount} ETH received",
+        settle_step5_miss: "Policy settled, no claim triggered",
+        
+        settle_title_processing: "Processing...",
+        settle_title_success: "Claim Successful",
+        settle_title_done: "Settlement Complete",
+        settle_preparing: "Preparing...",
+        settle_condition_met: "Claim conditions met, auto payout completed",
+        settle_condition_not_met: "Conditions not met, policy settled",
+        
+        step_request: "Request",
+        step_query: "Query",
+        step_verify: "Verify",
+        step_execute: "Execute",
+        step_complete: "Done",
       },
       
       ja: {
@@ -354,7 +467,7 @@
         plan_vip: "VIP",
         premium_label: "保険料",
         payout_label: "遅延≥{threshold}分で支払い",
-        rate_hint: "料率 {rate}%：{premium} RLO支払い、遅延時{payout} RLO受取",
+        rate_hint: "料率 {rate}%：{premium} ETH支払い、遅延時{payout} ETH受取",
         
         order_confirm: "注文確認",
         you_pay: "お支払い",
@@ -369,7 +482,7 @@
         
         connect_wallet: "ウォレット接続",
         connecting: "接続中...",
-        confirm_pay: "{amount} RLO 支払いを確認",
+        confirm_pay: "{amount} ETH 支払いを確認",
         processing: "処理中...",
         connect_first: "先にウォレットを接続してください",
         future_date_only: "将来のフライトのみ購入可能です",
@@ -417,6 +530,35 @@
         protocol: "プロトコル",
         network: "ネットワーク",
         contract: "コントラクト",
+        
+        // Demo & Settlement Steps
+        demo_title: "請求プロセスのデモ",
+        demo_desc: "下のボタンをクリックして、フライト遅延自動請求の全プロセスを体験",
+        demo_desc2: "フライト照会 → 遅延確認 → 請求実行 → 自動入金",
+        demo_start: "デモ開始",
+        demo_btn: "請求プロセスをデモ",
+        demo_purchased: "{flight} 保険を購入 (デモ)",
+        
+        settle_step1: "決済リクエスト開始...",
+        settle_step2: "{flight} フライトデータを照会中...",
+        settle_step3: "フライト遅延 {min} 分、請求条件を確認中...",
+        settle_step4_hit: "請求実行、送金中...",
+        settle_step4_miss: "条件未達、ステータス更新中...",
+        settle_step5_hit: "請求成功！{amount} ETH 入金完了",
+        settle_step5_miss: "決済完了、請求なし",
+        
+        settle_title_processing: "処理中...",
+        settle_title_success: "請求成功",
+        settle_title_done: "決済完了",
+        settle_preparing: "準備中...",
+        settle_condition_met: "請求条件達成、自動送金完了",
+        settle_condition_not_met: "条件未達、決済完了",
+        
+        step_request: "リクエスト",
+        step_query: "照会",
+        step_verify: "確認",
+        step_execute: "実行",
+        step_complete: "完了",
       },
       
       ko: {
@@ -457,7 +599,7 @@
         plan_vip: "VIP",
         premium_label: "보험료",
         payout_label: "지연≥{threshold}분 시 지급",
-        rate_hint: "요율 {rate}%: {premium} RLO 지불, 지연 시 {payout} RLO 수령",
+        rate_hint: "요율 {rate}%: {premium} ETH 지불, 지연 시 {payout} ETH 수령",
         
         order_confirm: "주문 확인",
         you_pay: "지불 금액",
@@ -472,7 +614,7 @@
         
         connect_wallet: "지갑 연결",
         connecting: "연결 중...",
-        confirm_pay: "{amount} RLO 결제 확인",
+        confirm_pay: "{amount} ETH 결제 확인",
         processing: "처리 중...",
         connect_first: "먼저 지갑을 연결하세요",
         future_date_only: "미래 항공편만 구매 가능합니다",
@@ -520,19 +662,48 @@
         protocol: "프로토콜",
         network: "네트워크",
         contract: "컨트랙트",
+        
+        // Demo & Settlement Steps
+        demo_title: "청구 프로세스 데모",
+        demo_desc: "아래 버튼을 클릭하여 항공편 지연 자동 청구 전체 프로세스를 체험하세요",
+        demo_desc2: "항공편 조회 → 지연 확인 → 청구 실행 → 자동 입금",
+        demo_start: "데모 시작",
+        demo_btn: "청구 프로세스 데모",
+        demo_purchased: "{flight} 보험 구매 (데모)",
+        
+        settle_step1: "정산 요청 시작...",
+        settle_step2: "{flight} 항공편 데이터 조회 중...",
+        settle_step3: "항공편 지연 {min}분, 청구 조건 확인 중...",
+        settle_step4_hit: "청구 실행, 송금 중...",
+        settle_step4_miss: "조건 미달, 상태 업데이트 중...",
+        settle_step5_hit: "청구 성공! {amount} ETH 입금 완료",
+        settle_step5_miss: "정산 완료, 청구 없음",
+        
+        settle_title_processing: "처리 중...",
+        settle_title_success: "청구 성공",
+        settle_title_done: "정산 완료",
+        settle_preparing: "준비 중...",
+        settle_condition_met: "청구 조건 달성, 자동 송금 완료",
+        settle_condition_not_met: "조건 미달, 정산 완료",
+        
+        step_request: "요청",
+        step_query: "조회",
+        step_verify: "확인",
+        step_execute: "실행",
+        step_complete: "완료",
       },
     };
 
-    // 翻译函数
+    // Translation function - supports all languages
     const t = (lang, key, params = {}) => {
-      let text = i18n[lang]?.[key] || i18n.zh[key] || key;
+      let text = i18n[lang]?.[key] || i18n.en?.[key] || key;
       Object.entries(params).forEach(([k, v]) => {
         text = text.replace(`{${k}}`, v);
       });
       return text;
     };
 
-    // 语言 Context
+    // Language Context
     const LangContext = createContext();
     const useLang = () => useContext(LangContext);
 
@@ -540,26 +711,27 @@
     // CONTRACT CONSTANTS
     // ══════════════════════════════════════════════════════════════════════════
     const PROGRAM_ID = "ChainSure1111111111111111111111111111111111";
-    const KELVIN_PER_RLO = 1_000_000_000n;
+    const KELVIN_PER_ETH = 1_000_000_000n;
     const DELAY_THRESHOLD = 120; // minutes
-    const MAX_POLICIES_PER_DAY = 5; // 每用户每天最多5个保单
+    const MAX_POLICIES_PER_DAY = 5; // max 5 policies per user per day
 
     const PolicyStatus = { Active: 0, Claimed: 1, Expired: 2, Cancelled: 3 };
     
-    // 保障方案
+    // Product Lines
+    const PRODUCTS = [
+      { id: "flight", nameKey: "product_flight", icon: "✈️", active: true, color: "#3b82f6" },
+      { id: "logistics", nameKey: "product_logistics", icon: "📦", active: true, color: "#8b5cf6" },
+      { id: "auto", nameKey: "product_auto", icon: "🚗", active: true, color: "#10b981" },
+      { id: "health", nameKey: "product_health", icon: "🏥", active: false, color: "#ef4444" },
+      { id: "life", nameKey: "product_life", icon: "❤️", active: false, color: "#ec4899" },
+    ];
+    
+    // Coverage plans
     const TIERS = [
       { premium: 50, payout: 200, nameKey: "plan_basic", rate: 25 },
       { premium: 100, payout: 500, nameKey: "plan_standard", rate: 20 },
       { premium: 200, payout: 1000, nameKey: "plan_premium", rate: 20 },
       { premium: 500, payout: 2000, nameKey: "plan_vip", rate: 25 },
-    ];
-
-    // 产品线
-    const PRODUCTS = [
-      { id: "flight", name: "Flight", labelKey: "product_flight", icon: "✈️", active: true },
-      { id: "health", name: "Health", labelKey: "product_health", icon: "🏥", active: false },
-      { id: "auto", name: "Auto", labelKey: "product_auto", icon: "🚗", active: false },
-      { id: "life", name: "Life", labelKey: "product_life", icon: "❤️", active: false },
     ];
 
     const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -568,8 +740,8 @@
     const shortSig = (sig) => sig ? `${sig.slice(0, 8)}...${sig.slice(-6)}` : "";
 
     // ══════════════════════════════════════════════════════════════════════════
-    // RIALO SDK INTEGRATION
-    // 真实环境需要: npm install @rialo/ts-cdk @rialo/frost-core
+    // SDK INTEGRATION
+    // Production: npm install @anthropic/sdk
     // ══════════════════════════════════════════════════════════════════════════
 
     /*
@@ -682,7 +854,7 @@
 
         // 演示模式
         await sleep(300);
-        return BigInt(10000) * KELVIN_PER_RLO;
+        return BigInt(10000) * KELVIN_PER_ETH;
       }
 
       async getAccountInfo(address) {
@@ -697,8 +869,8 @@
         const { owner, flightIata, flightIcao, date, scheduledDeparture, depAirport, arrAirport, payoutAmount, premiumAmount } = params;
         
         // 使用传入的保费和赔付金额
-        const premiumKelvin = BigInt(premiumAmount) * KELVIN_PER_RLO;
-        const payoutKelvin = BigInt(payoutAmount) * KELVIN_PER_RLO;
+        const premiumKelvin = BigInt(premiumAmount) * KELVIN_PER_ETH;
+        const payoutKelvin = BigInt(payoutAmount) * KELVIN_PER_ETH;
 
         // 获取 PDA 地址
         const [policyAddress, policyBump] = getPolicyAddress(owner, flightIata, date);
@@ -820,40 +992,40 @@
     const rialoSDK = new RialoSDK("devnet");
 
     // ══════════════════════════════════════════════════════════════════════════
-    // FLIGHT DATA (实际应从 API 获取)
+    // FLIGHT DATA
     // ══════════════════════════════════════════════════════════════════════════
     const FLIGHTS = [
-      { id: "CA1234", iata: "CA1234", icao: "CCA1234", airline: { name: "中国国航" },
-        dep: { iata: "PEK", city: "北京首都", scheduled: "14:30" },
-        arr: { iata: "SHA", city: "上海虹桥", scheduled: "16:55" },
+      { id: "CA1234", iata: "CA1234", icao: "CCA1234", airline: { name: "Air China" },
+        dep: { iata: "PEK", city: "Beijing Capital", scheduled: "14:30" },
+        arr: { iata: "SHA", city: "Shanghai Hongqiao", scheduled: "16:55" },
         aircraft: { model: "Airbus A330-300" }, duration: 145, dep_delayed: 165, intl: false },
-      { id: "MU5678", iata: "MU5678", icao: "CES5678", airline: { name: "东方航空" },
-        dep: { iata: "PVG", city: "上海浦东", scheduled: "09:15" },
-        arr: { iata: "CAN", city: "广州白云", scheduled: "11:40" },
+      { id: "MU5678", iata: "MU5678", icao: "CES5678", airline: { name: "China Eastern" },
+        dep: { iata: "PVG", city: "Shanghai Pudong", scheduled: "09:15" },
+        arr: { iata: "CAN", city: "Guangzhou Baiyun", scheduled: "11:40" },
         aircraft: { model: "Boeing 737-800" }, duration: 143, dep_delayed: 7, intl: false },
-      { id: "CZ3090", iata: "CZ3090", icao: "CSN3090", airline: { name: "南方航空" },
-        dep: { iata: "CAN", city: "广州白云", scheduled: "16:45" },
-        arr: { iata: "CTU", city: "成都天府", scheduled: "19:15" },
+      { id: "CZ3090", iata: "CZ3090", icao: "CSN3090", airline: { name: "China Southern" },
+        dep: { iata: "CAN", city: "Guangzhou Baiyun", scheduled: "16:45" },
+        arr: { iata: "CTU", city: "Chengdu Tianfu", scheduled: "19:15" },
         aircraft: { model: "Airbus A321neo" }, duration: 150, dep_delayed: 243, intl: false },
-      { id: "HU7801", iata: "HU7801", icao: "CHH7801", airline: { name: "海南航空" },
-        dep: { iata: "PEK", city: "北京首都", scheduled: "11:00" },
-        arr: { iata: "SZX", city: "深圳宝安", scheduled: "14:10" },
+      { id: "HU7801", iata: "HU7801", icao: "CHH7801", airline: { name: "Hainan Airlines" },
+        dep: { iata: "PEK", city: "Beijing Capital", scheduled: "11:00" },
+        arr: { iata: "SZX", city: "Shenzhen Baoan", scheduled: "14:10" },
         aircraft: { model: "Boeing 787-9" }, duration: 183, dep_delayed: 35, intl: false },
-      { id: "CA985", iata: "CA985", icao: "CCA985", airline: { name: "中国国航" },
-        dep: { iata: "PEK", city: "北京首都", scheduled: "01:30" },
-        arr: { iata: "JFK", city: "纽约肯尼迪", scheduled: "02:30" },
+      { id: "CA985", iata: "CA985", icao: "CCA985", airline: { name: "Air China" },
+        dep: { iata: "PEK", city: "Beijing Capital", scheduled: "01:30" },
+        arr: { iata: "JFK", city: "New York JFK", scheduled: "02:30" },
         aircraft: { model: "Boeing 777-300ER" }, duration: 780, dep_delayed: 156, intl: true },
-      { id: "SQ807", iata: "SQ807", icao: "SIA807", airline: { name: "新加坡航空" },
-        dep: { iata: "SIN", city: "新加坡樟宜", scheduled: "08:45" },
-        arr: { iata: "PEK", city: "北京首都", scheduled: "15:00" },
+      { id: "SQ807", iata: "SQ807", icao: "SIA807", airline: { name: "Singapore Airlines" },
+        dep: { iata: "SIN", city: "Singapore Changi", scheduled: "08:45" },
+        arr: { iata: "PEK", city: "Beijing Capital", scheduled: "15:00" },
         aircraft: { model: "Airbus A350-900" }, duration: 375, dep_delayed: 197, intl: true },
-      { id: "NH960", iata: "NH960", icao: "ANA960", airline: { name: "全日空" },
-        dep: { iata: "NRT", city: "东京成田", scheduled: "10:20" },
-        arr: { iata: "PVG", city: "上海浦东", scheduled: "12:45" },
+      { id: "NH960", iata: "NH960", icao: "ANA960", airline: { name: "All Nippon Airways" },
+        dep: { iata: "NRT", city: "Tokyo Narita", scheduled: "10:20" },
+        arr: { iata: "PVG", city: "Shanghai Pudong", scheduled: "12:45" },
         aircraft: { model: "Boeing 787-9" }, duration: 200, dep_delayed: 15, intl: true },
-      { id: "KE831", iata: "KE831", icao: "KAL831", airline: { name: "大韩航空" },
-        dep: { iata: "ICN", city: "首尔仁川", scheduled: "09:00" },
-        arr: { iata: "PEK", city: "北京首都", scheduled: "10:05" },
+      { id: "KE831", iata: "KE831", icao: "KAL831", airline: { name: "Korean Air" },
+        dep: { iata: "ICN", city: "Seoul Incheon", scheduled: "09:00" },
+        arr: { iata: "PEK", city: "Beijing Capital", scheduled: "10:05" },
         aircraft: { model: "Airbus A330-300" }, duration: 125, dep_delayed: 180, intl: true },
     ];
 
@@ -986,18 +1158,37 @@
         addTx({
           type: "purchase",
           time: Date.now(),
-          amount: -Number(result.premium / KELVIN_PER_RLO),
-          desc: `购买 ${flight.iata} 保险`,
+          amount: -Number(result.premium / KELVIN_PER_ETH),
+          flightIata: flight.iata,
           signature: result.signature,
         });
 
         return { signature: result.signature, policy };
       };
 
-      // 结算保单
-      const settlePolicy = async (policy) => {
+      // 结算保单 - 带演示流程
+      const settlePolicy = async (policy, onStep, $t) => {
         if (!wallet) throw new Error("Wallet not connected");
 
+        // 步骤1: 发起结算请求
+        if (onStep) onStep(1, $t ? $t("settle_step1") : "Initiating...");
+        await sleep(800);
+
+        // 步骤2: 查询航班数据
+        if (onStep) onStep(2, $t ? $t("settle_step2", { flight: policy.flightIata }) : `Querying ${policy.flightIata}...`);
+        await sleep(1200);
+
+        const delayed = policy.flight.dep_delayed;
+        
+        // 步骤3: 验证延误时间
+        if (onStep) onStep(3, $t ? $t("settle_step3", { min: delayed }) : `Delayed ${delayed} min, verifying...`);
+        await sleep(800);
+
+        const hit = delayed >= DELAY_THRESHOLD;
+
+        // 步骤4: 执行链上操作
+        if (onStep) onStep(4, $t ? (hit ? $t("settle_step4_hit") : $t("settle_step4_miss")) : (hit ? "Claiming..." : "Updating..."));
+        
         const result = await rialoSDK.settlePolicy({
           owner: wallet,
           policyAddress: policy.address,
@@ -1005,10 +1196,9 @@
           date: policy.date,
         });
 
-        // 真实环境: 从链上事件获取延误数据
-        // 演示模式: 使用航班的 mock 数据
-        const delayed = policy.flight.dep_delayed;
-        const hit = delayed >= DELAY_THRESHOLD;
+        const amountETH = n(Number(policy.payoutAmount / KELVIN_PER_ETH));
+        // 步骤5: 完成
+        if (onStep) onStep(5, $t ? (hit ? $t("settle_step5_hit", { amount: amountETH }) : $t("settle_step5_miss")) : (hit ? `Success! ${amountETH} ETH` : "Settled"));
 
         // 更新保单状态
         setPolicies(prev => prev.map(p =>
@@ -1034,8 +1224,9 @@
           addTx({
             type: "claim",
             time: Date.now(),
-            amount: Number(policy.payoutAmount / KELVIN_PER_RLO),
-            desc: `${policy.flightIata} 理赔到账 (延误${delayed}分钟)`,
+            amount: Number(policy.payoutAmount / KELVIN_PER_ETH),
+            flightIata: policy.flightIata,
+            delayMin: delayed,
             signature: result.signature,
           });
         } else {
@@ -1043,7 +1234,8 @@
             type: "expire",
             time: Date.now(),
             amount: 0,
-            desc: `${policy.flightIata} 保单过期 (延误${delayed}分钟 < ${DELAY_THRESHOLD}分钟)`,
+            flightIata: policy.flightIata,
+            delayMin: delayed,
             signature: result.signature,
           });
         }
@@ -1053,11 +1245,55 @@
 
       const addTx = (tx) => setTxHistory(prev => [tx, ...prev]);
 
+      // 演示模式：一键添加已过期保单
+      const addDemoPolicy = () => {
+        if (!wallet) return null;
+        
+        // 使用延误严重的航班作为演示
+        const demoFlight = FLIGHTS.find(f => f.dep_delayed >= DELAY_THRESHOLD) || FLIGHTS[0];
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const demoDate = yesterday.toISOString().split("T")[0];
+        
+        const [policyAddress] = getPolicyAddress(wallet, demoFlight.iata, demoDate);
+        
+        const demoPolicy = {
+          address: policyAddress,
+          owner: wallet,
+          flightIata: demoFlight.iata,
+          flightIcao: demoFlight.icao,
+          flight: demoFlight,
+          date: demoDate,
+          scheduledDeparture: demoFlight.dep.scheduled,
+          depAirport: demoFlight.dep.iata,
+          arrAirport: demoFlight.arr.iata,
+          payoutAmount: BigInt(500) * KELVIN_PER_ETH,  // 500 ETH
+          premiumPaid: BigInt(100) * KELVIN_PER_ETH,   // 100 ETH
+          status: PolicyStatus.Active,
+          createdAt: Date.now() - 86400000,  // 昨天创建
+          settledAt: null,
+          actualDelayMinutes: null,
+          txSignature: "demo_" + Math.random().toString(36).slice(2, 10),
+        };
+        
+        setPolicies(prev => [demoPolicy, ...prev]);
+        
+        addTx({
+          type: "demo_purchase",
+          time: Date.now() - 86400000,
+          amount: -100,
+          flightIata: demoFlight.iata,
+          signature: demoPolicy.txSignature,
+        });
+        
+        return demoPolicy;
+      };
+
       return (
         <AppContext.Provider value={{
           wallet, balance, policies, claims, txHistory, page, loading,
           setPage, connect, disconnect, purchasePolicy, settlePolicy, refreshData, addTx,
-          getTodayPolicyCount, canPurchaseMore,
+          getTodayPolicyCount, canPurchaseMore, addDemoPolicy,
         }}>
           {children}
         </AppContext.Provider>
@@ -1072,7 +1308,7 @@
     
     function Anim({ value }) {
       const [v, setV] = useState(0);
-      const target = typeof value === 'bigint' ? Number(value / KELVIN_PER_RLO) : value;
+      const target = typeof value === 'bigint' ? Number(value / KELVIN_PER_ETH) : value;
       useEffect(() => {
         let from = v, start = null;
         const step = (ts) => {
@@ -1303,8 +1539,8 @@
                   fontSize: 13, fontWeight: 500, cursor: "pointer",
                   fontFamily: ff, display: "flex", alignItems: "center", gap: 6,
                 }}>
-                  <span>{LANGS[lang].flag}</span>
-                  <span style={{ fontSize: 11 }}>{LANGS[lang].code.toUpperCase()}</span>
+                  <span>{LANGS[lang]?.flag}</span>
+                  <span style={{ fontSize: 11 }}>{lang.toUpperCase()}</span>
                 </button>
                 {showLangMenu && (
                   <div style={{
@@ -1343,7 +1579,7 @@
                   borderRadius: 10 
                 }}>
                   <span style={{ fontSize: 15, fontFamily: fm, fontWeight: 600, color: T.gold }}><Anim value={balance} /></span>
-                  <span style={{ fontSize: 11, color: T.tx4, fontWeight: 500 }}>RLO</span>
+                  <span style={{ fontSize: 11, color: T.tx4, fontWeight: 500 }}>ETH</span>
                 </div>
               )}
 
@@ -1371,11 +1607,12 @@
     } 
 
     // ══════════════════════════════════════════════════════════════════════════
-    // PAGE: HOME (投保)
+    // PAGE: HOME
     // ══════════════════════════════════════════════════════════════════════════
     function HomePage() {
       const { wallet, balance, purchasePolicy, setPage, loading, getTodayPolicyCount, canPurchaseMore } = useApp();
       const { $, lang } = useLang();
+      const [product, setProduct] = useState("flight");
       const [fi, setFi] = useState(0);
       const [ti, setTi] = useState(1);
       const [tab, setTab] = useState("all");
@@ -1395,9 +1632,8 @@
       const today = new Date().toISOString().split("T")[0];
       const tomorrow = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split("T")[0]; })();
       const canPurchase = date > today;
-      const balanceRLO = Number(balance / KELVIN_PER_RLO);
+      const balanceETH = Number(balance / KELVIN_PER_ETH);
       
-      // 每日限额检查
       const todayCount = getTodayPolicyCount();
       const canBuyMore = canPurchaseMore();
 
@@ -1407,7 +1643,7 @@
           setError($("daily_limit_reached", { max: MAX_POLICIES_PER_DAY }));
           return;
         }
-        if (balanceRLO < premium) {
+        if (balanceETH < premium) {
           setError($("insufficient_balance"));
           return;
         }
@@ -1449,40 +1685,51 @@
 
       return (
         <div style={{ maxWidth: 1080, margin: "0 auto", padding: "40px 32px" }}>
-          {/* 产品线选择 */}
-          <div style={{ display: "flex", gap: 12, marginBottom: 36 }}>
+          {/* Product Line Selector */}
+          <div style={{ display: "flex", gap: 10, marginBottom: 32, overflowX: "auto", paddingBottom: 4 }}>
             {PRODUCTS.map(p => (
-              <div key={p.id} style={{
-                padding: "14px 24px", 
-                borderRadius: 14,
-                background: p.active 
-                  ? "linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(180,140,50,0.06) 100%)" 
-                  : "rgba(20,20,25,0.6)",
-                border: "1px solid " + (p.active ? T.goldBd : T.b),
-                opacity: p.active ? 1 : 0.4,
-                cursor: p.active ? "pointer" : "not-allowed",
-                display: "flex", alignItems: "center", gap: 12,
-                transition: "all 0.25s ease",
-                boxShadow: p.active ? "0 4px 20px rgba(212,175,55,0.1)" : "none"
-              }}>
-                <span style={{ fontSize: 22, filter: p.active ? "none" : "grayscale(1)" }}>{p.icon}</span>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: p.active ? T.gold : T.tx4, letterSpacing: "-0.01em" }}>{$(p.labelKey)}</div>
-                  <div style={{ fontSize: 10, color: T.tx4, marginTop: 2, letterSpacing: "0.02em" }}>ChainSure {p.name}</div>
-                </div>
+              <button 
+                key={p.id} 
+                onClick={() => p.active && setProduct(p.id)}
+                disabled={!p.active}
+                style={{
+                  padding: "12px 20px", 
+                  borderRadius: 12,
+                  border: "1px solid " + (product === p.id ? T.goldBd : p.active ? T.b : "transparent"),
+                  background: product === p.id 
+                    ? "linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(180,140,50,0.06) 100%)" 
+                    : p.active ? "rgba(20,20,25,0.6)" : "rgba(20,20,25,0.3)",
+                  opacity: p.active ? 1 : 0.5,
+                  cursor: p.active ? "pointer" : "not-allowed",
+                  display: "flex", alignItems: "center", gap: 10,
+                  transition: "all 0.25s ease",
+                  boxShadow: product === p.id ? "0 4px 20px rgba(212,175,55,0.1)" : "none",
+                  fontFamily: ff, whiteSpace: "nowrap"
+                }}
+              >
+                <span style={{ fontSize: 20, filter: p.active ? "none" : "grayscale(1)" }}>{p.icon}</span>
+                <span style={{ 
+                  fontSize: 13, fontWeight: product === p.id ? 600 : 500, 
+                  color: product === p.id ? T.gold : p.active ? T.tx2 : T.tx4 
+                }}>
+                  {$(p.nameKey)}
+                </span>
                 {!p.active && <Badge variant="default">{$("coming_soon")}</Badge>}
-              </div>
+              </button>
             ))}
           </div>
 
           {/* Header */}
-          <div style={{ marginBottom: 40 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-              <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.02em", color: T.tx }}>{$("page_title")}</h1>
-              <Badge variant="gold">{$("smart_contract")}</Badge>
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+              <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", color: T.tx }}>
+                {product === "flight" ? $("page_title") : product === "logistics" ? $("page_title_logistics") : $("page_title_auto")}
+              </h1>
+              <Badge variant="gold">DEMO</Badge>
             </div>
-            <p style={{ fontSize: 15, color: T.tx3, lineHeight: 1.7, maxWidth: 500 }}>
-              {$("page_desc", { threshold: DELAY_THRESHOLD })}
+            <p style={{ fontSize: 14, color: T.tx3, lineHeight: 1.6, maxWidth: 520 }}>
+              {product === "flight" ? $("page_desc", { threshold: DELAY_THRESHOLD }) : 
+               product === "logistics" ? $("page_desc_logistics") : $("page_desc_auto")}
             </p>
           </div>
 
@@ -1600,14 +1847,14 @@
                           <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
                             <span style={{ fontSize: 11, color: T.tx4 }}>{$("premium_label")}</span>
                             <span style={{ fontFamily: fm, fontSize: 18, fontWeight: 700, color: sel ? T.w : T.tx2 }}>{n(tier.premium)}</span>
-                            <span style={{ fontSize: 11, color: T.tx4 }}>RLO</span>
+                            <span style={{ fontSize: 11, color: T.tx4 }}>ETH</span>
                           </div>
                         </div>
                         <div style={{ textAlign: "right" }}>
                           <div style={{ fontSize: 11, color: T.gold, marginBottom: 4 }}>{$("payout_label", { threshold: DELAY_THRESHOLD })}</div>
                           <div style={{ display: "flex", alignItems: "baseline", gap: 4, justifyContent: "flex-end" }}>
                             <span style={{ fontFamily: fm, fontSize: 20, fontWeight: 700, color: sel ? T.gold : T.tx3 }}>+{n(tier.payout)}</span>
-                            <span style={{ fontSize: 11, color: T.tx4 }}>RLO</span>
+                            <span style={{ fontSize: 11, color: T.tx4 }}>ETH</span>
                           </div>
                         </div>
                       </button>
@@ -1658,12 +1905,12 @@
                   <div style={{ padding: "16px", background: T.bg, borderRadius: 10, textAlign: "center" }}>
                     <div style={{ fontSize: 11, color: T.tx4, marginBottom: 6 }}>{$("you_pay")}</div>
                     <div style={{ fontFamily: fm, fontSize: 28, fontWeight: 700, color: T.tx }}>{n(premium)}</div>
-                    <div style={{ fontSize: 11, color: T.tx4 }}>RLO</div>
+                    <div style={{ fontSize: 11, color: T.tx4 }}>ETH</div>
                   </div>
                   <div style={{ padding: "16px", background: T.goldBg, border: "1px solid " + T.goldBd, borderRadius: 10, textAlign: "center" }}>
                     <div style={{ fontSize: 11, color: T.gold, marginBottom: 6 }}>{$("you_get")}</div>
                     <div style={{ fontFamily: fm, fontSize: 28, fontWeight: 700, color: T.gold }}>+{n(payout)}</div>
-                    <div style={{ fontSize: 11, color: T.gold }}>RLO</div>
+                    <div style={{ fontSize: 11, color: T.gold }}>ETH</div>
                   </div>
                 </div>
 
@@ -1708,7 +1955,7 @@
                 </Card>
               ) : (
                 <>
-                  <Button onClick={handlePurchase} disabled={busy || balanceRLO < premium} size="lg" style={{ width: "100%" }}>
+                  <Button onClick={handlePurchase} disabled={busy || balanceETH < premium} size="lg" style={{ width: "100%" }}>
                     {busy ? $("processing") : $("confirm_pay", { amount: n(premium) })}
                   </Button>
                   {/* 每日限额提示 */}
@@ -1723,9 +1970,9 @@
                 </>
               )}
 
-              {/* Contract Info */}
+              {/* Info */}
               <div style={{ fontSize: 11, color: T.tx4, textAlign: "center", padding: "8px 0" }}>
-                ChainSure Flight · <span style={{ fontFamily: fm }}>{shortAddr(PROGRAM_ID)}</span> · Rialo Devnet
+                ChainSure · Demo
               </div>
             </div>
           </div>
@@ -1737,30 +1984,164 @@
     // PAGE: POLICIES (保单列表)
     // ══════════════════════════════════════════════════════════════════════════
     function PoliciesPage() {
-      const { wallet, policies, settlePolicy, setPage } = useApp();
+      const { wallet, policies, settlePolicy, setPage, addDemoPolicy, connect } = useApp();
       const { $ } = useLang();
       const [settling, setSettling] = useState(null);
+      const [settleStep, setSettleStep] = useState(0);
+      const [settleMsg, setSettleMsg] = useState("");
+      const [settleResult, setSettleResult] = useState(null);
 
       const today = new Date().toISOString().split("T")[0];
 
+      // 带连接钱包的演示（用于未连接状态）
+      const handleDemoWithConnect = async () => {
+        await connect();
+        // 连接成功后等待状态更新，然后自动执行演示
+        setTimeout(async () => {
+          const demoPolicy = addDemoPolicy();
+          if (demoPolicy) {
+            await sleep(500);
+            handleSettle(demoPolicy);
+          }
+        }, 500);
+      };
+
+      // 一键演示（已连接状态）
+      const handleDemo = async () => {
+        const demoPolicy = addDemoPolicy();
+        if (demoPolicy) {
+          // 等待一下让UI更新
+          await sleep(500);
+          // 自动触发结算
+          handleSettle(demoPolicy);
+        }
+      };
+
       const handleSettle = async (policy) => {
         setSettling(policy.address);
+        setSettleStep(0);
+        setSettleMsg("");
+        setSettleResult(null);
+        
         try {
-          await settlePolicy(policy);
+          const result = await settlePolicy(policy, (step, msg) => {
+            setSettleStep(step);
+            setSettleMsg(msg);
+          }, $);
+          setSettleResult(result);
         } catch (e) {
           console.error(e);
         }
-        setSettling(null);
+        
+        // 3秒后关闭弹窗
+        setTimeout(() => {
+          setSettling(null);
+          setSettleStep(0);
+          setSettleMsg("");
+          setSettleResult(null);
+        }, 3000);
       };
 
-      if (!wallet) {
+      // 结算进度弹窗
+      const SettleModal = () => {
+        if (!settling) return null;
+        const steps = [
+          { num: 1, label: $("step_request") },
+          { num: 2, label: $("step_query") },
+          { num: 3, label: $("step_verify") },
+          { num: 4, label: $("step_execute") },
+          { num: 5, label: $("step_complete") },
+        ];
         return (
-          <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
-            <Card>
-              <Empty icon="🔒" title={$("connect_first")} />
-            </Card>
+          <div style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 1000
+          }}>
+            <div style={{
+              background: T.card, border: "1px solid " + T.b2,
+              borderRadius: 20, padding: "32px 40px", width: 400,
+              boxShadow: "0 20px 60px rgba(0,0,0,0.5)"
+            }}>
+              <div style={{ textAlign: "center", marginBottom: 24 }}>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>
+                  {settleResult ? (settleResult.hit ? "✅" : "📋") : "⏳"}
+                </div>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: T.tx }}>
+                  {settleResult ? (settleResult.hit ? $("settle_title_success") : $("settle_title_done")) : $("settle_title_processing")}
+                </h3>
+              </div>
+              
+              {/* 步骤进度 */}
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
+                {steps.map((s, i) => (
+                  <div key={s.num} style={{ textAlign: "center", flex: 1 }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: "50%",
+                      background: settleStep >= s.num ? T.gold : T.raised,
+                      color: settleStep >= s.num ? "#000" : T.tx4,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 12, fontWeight: 600, margin: "0 auto 6px",
+                      transition: "all 0.3s ease"
+                    }}>
+                      {settleStep > s.num ? "✓" : s.num}
+                    </div>
+                    <div style={{ fontSize: 10, color: settleStep >= s.num ? T.tx2 : T.tx4 }}>
+                      {s.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 当前状态 */}
+              <div style={{
+                background: T.raised, borderRadius: 10, padding: "14px 18px",
+                fontSize: 13, color: T.tx2, textAlign: "center"
+              }}>
+                {settleMsg || $("settle_preparing")}
+              </div>
+
+              {/* 结果显示 */}
+              {settleResult && (
+                <div style={{
+                  marginTop: 16, padding: "16px",
+                  background: settleResult.hit ? T.successBg : T.warnBg,
+                  border: "1px solid " + (settleResult.hit ? T.successBd : T.warnBd),
+                  borderRadius: 10, textAlign: "center"
+                }}>
+                  <div style={{ fontSize: 12, color: settleResult.hit ? T.success : T.warn, marginBottom: 4 }}>
+                    {$("delay_min", { min: settleResult.delayed })} {settleResult.hit ? "≥" : "<"} {DELAY_THRESHOLD} min
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: settleResult.hit ? T.success : T.tx2 }}>
+                    {settleResult.hit ? $("settle_condition_met") : $("settle_condition_not_met")}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         );
+      };
+
+      // 未连接钱包时的演示入口
+      const DemoEntryCard = () => (
+        <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
+          <Card style={{ textAlign: "center", padding: "48px 32px" }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>🎬</div>
+            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12, color: T.tx }}>{$("demo_title")}</h2>
+            <p style={{ fontSize: 14, color: T.tx3, marginBottom: 28, lineHeight: 1.7 }}>
+              {$("demo_desc")}<br/>
+              {$("demo_desc2")}
+            </p>
+            <Button onClick={handleDemoWithConnect} size="lg" style={{ padding: "0 32px" }}>
+              🚀 {$("demo_start")}
+            </Button>
+          </Card>
+        </div>
+      );
+
+      if (!wallet) {
+        return <DemoEntryCard />;
       }
 
       const active = policies.filter(p => p.status === PolicyStatus.Active);
@@ -1768,9 +2149,19 @@
 
       return (
         <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
+          <SettleModal />
+          
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
             <h1 style={{ fontSize: 26, fontWeight: 700 }}>{$("my_policies")}</h1>
-            <Badge>{$("policies_count", { count: policies.length })}</Badge>
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <Button onClick={handleDemo} variant="ghost" size="sm" style={{ 
+                background: "linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(180,140,50,0.1) 100%)",
+                border: "1px solid " + T.goldBd
+              }}>
+                🎬 {$("demo_btn")}
+              </Button>
+              <Badge>{$("policies_count", { count: policies.length })}</Badge>
+            </div>
           </div>
 
           {policies.length === 0 ? (
@@ -1779,7 +2170,12 @@
                 icon="📋" 
                 title={$("no_policies")}
                 desc={$("no_policies_desc")}
-                action={<Button onClick={() => setPage("home")}>{$("go_insure")}</Button>}
+                action={
+                  <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                    <Button onClick={() => setPage("home")}>{$("go_insure")}</Button>
+                    <Button onClick={handleDemo} variant="ghost">🎬 {$("demo_start")}</Button>
+                  </div>
+                }
               />
             </Card>
           ) : (
@@ -1793,7 +2189,7 @@
                   {active.map(p => {
                     const canSettle = p.date <= today;
                     const isSettling = settling === p.address;
-                    const payoutRLO = Number(p.payoutAmount / KELVIN_PER_RLO);
+                    const payoutETH = Number(p.payoutAmount / KELVIN_PER_ETH);
                     return (
                       <Card key={p.address}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -1812,7 +2208,7 @@
                           <div style={{ textAlign: "right" }}>
                             <div style={{ fontSize: 11, color: T.tx4 }}>{$("you_get")}</div>
                             <div style={{ fontFamily: fm, fontSize: 20, fontWeight: 700 }}>
-                              {n(payoutRLO)} <span style={{ fontSize: 11, color: T.tx4 }}>RLO</span>
+                              {n(payoutETH)} <span style={{ fontSize: 11, color: T.tx4 }}>ETH</span>
                             </div>
                           </div>
                         </div>
@@ -1828,9 +2224,6 @@
                             <Badge>{$("waiting")}</Badge>
                           )}
                         </div>
-                        <div style={{ marginTop: 12, fontSize: 11, color: T.tx4, fontFamily: fm }}>
-                          PDA: {shortAddr(p.address)} · TX: {shortSig(p.txSignature)}
-                        </div>
                       </Card>
                     );
                   })}
@@ -1844,7 +2237,7 @@
                     {$("history_policies")} ({history.length})
                   </div>
                   {history.map(p => {
-                    const payoutRLO = Number(p.payoutAmount / KELVIN_PER_RLO);
+                    const payoutETH = Number(p.payoutAmount / KELVIN_PER_ETH);
                     const isClaimed = p.status === PolicyStatus.Claimed;
                     return (
                       <Card key={p.address} style={{ opacity: 0.7 }}>
@@ -1853,7 +2246,7 @@
                             <span style={{ fontFamily: fm, fontSize: 16, fontWeight: 600 }}>{p.flightIata}</span>
                             <span style={{ fontSize: 12, color: T.tx4 }}>{p.date}</span>
                             <Badge variant={isClaimed ? "success" : "error"}>
-                              {isClaimed ? `${$("claimed")} +${n(payoutRLO)}` : `${$("expired")} (${$("delay_min", { min: p.actualDelayMinutes })})`}
+                              {isClaimed ? `${$("claimed")} +${n(payoutETH)}` : `${$("expired")} (${$("delay_min", { min: p.actualDelayMinutes })})`}
                             </Badge>
                           </div>
                           <div style={{ fontSize: 12, color: T.tx4 }}>{p.depAirport} → {p.arrAirport}</div>
@@ -1886,7 +2279,7 @@
         );
       }
 
-      const totalClaimed = claims.reduce((sum, c) => sum + Number(c.amount / KELVIN_PER_RLO), 0);
+      const totalClaimed = claims.reduce((sum, c) => sum + Number(c.amount / KELVIN_PER_ETH), 0);
 
       return (
         <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
@@ -1906,7 +2299,7 @@
               {/* Total */}
               <Card style={{ marginBottom: 24, background: T.goldBg, border: "1px solid " + T.goldBd }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Stat label={$("total_claimed")} value={`+${n(totalClaimed)}`} sub="RLO" color={T.gold} />
+                  <Stat label={$("total_claimed")} value={`+${n(totalClaimed)}`} sub="ETH" color={T.gold} />
                   <div style={{ fontSize: 48, opacity: 0.3 }}>💰</div>
                 </div>
               </Card>
@@ -1917,7 +2310,7 @@
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {claims.map(c => {
-                  const amountRLO = Number(c.amount / KELVIN_PER_RLO);
+                  const amountETH = Number(c.amount / KELVIN_PER_ETH);
                   return (
                     <Card key={c.address}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -1933,8 +2326,8 @@
                           </div>
                         </div>
                         <div style={{ textAlign: "right" }}>
-                          <div style={{ fontFamily: fm, fontSize: 22, fontWeight: 700, color: T.gold }}>+{n(amountRLO)}</div>
-                          <div style={{ fontSize: 11, color: T.tx4 }}>RLO</div>
+                          <div style={{ fontFamily: fm, fontSize: 22, fontWeight: 700, color: T.gold }}>+{n(amountETH)}</div>
+                          <div style={{ fontSize: 11, color: T.tx4 }}>ETH</div>
                         </div>
                       </div>
                       <div style={{ marginTop: 12, fontSize: 11, color: T.tx4, fontFamily: fm }}>
@@ -1972,7 +2365,7 @@
         );
       }
 
-      const balanceRLO = Number(balance / KELVIN_PER_RLO);
+      const balanceETH = Number(balance / KELVIN_PER_ETH);
 
       return (
         <div style={{ maxWidth: 600, margin: "0 auto", padding: "32px 24px" }}>
@@ -1981,7 +2374,7 @@
           {/* Balance Card */}
           <Card style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <Stat label={$("balance")} value={<Anim value={balance} />} sub="RLO" />
+              <Stat label={$("balance")} value={<Anim value={balance} />} sub="ETH" />
               <Badge variant="success">{$("connected")}</Badge>
             </div>
             <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid " + T.b }}>
@@ -2003,46 +2396,47 @@
             </Card>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {txHistory.map((tx, i) => (
-                <Card key={i} style={{ padding: "14px 18px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <span style={{ fontSize: 20 }}>
-                        {tx.type === "connect" ? "🔗" : tx.type === "disconnect" ? "🔌" : tx.type === "purchase" ? "🛡️" : tx.type === "claim" ? "💰" : "📋"}
-                      </span>
-                      <div>
-                        <div style={{ fontSize: 13, color: T.tx }}>{tx.desc}</div>
-                        <div style={{ fontSize: 11, color: T.tx4, marginTop: 2 }}>
-                          {new Date(tx.time).toLocaleString()}
-                          {tx.signature && <span style={{ marginLeft: 8, fontFamily: fm }}>{shortSig(tx.signature)}</span>}
+              {txHistory.map((tx, i) => {
+                // 根据类型生成描述
+                let desc = "";
+                if (tx.type === "connect") desc = $("tx_connect");
+                else if (tx.type === "disconnect") desc = $("tx_disconnect");
+                else if (tx.type === "purchase") desc = $("tx_purchase", { flight: tx.flightIata || "" });
+                else if (tx.type === "demo_purchase") desc = $("demo_purchased", { flight: tx.flightIata || "" });
+                else if (tx.type === "claim") desc = $("tx_claim", { flight: tx.flightIata || "", min: tx.delayMin || 0 });
+                else if (tx.type === "expire") desc = $("tx_expire", { flight: tx.flightIata || "", min: tx.delayMin || 0 });
+                else desc = tx.desc || tx.type;
+                
+                return (
+                  <Card key={i} style={{ padding: "14px 18px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <span style={{ fontSize: 20 }}>
+                          {tx.type === "connect" ? "🔗" : tx.type === "disconnect" ? "🔌" : (tx.type === "purchase" || tx.type === "demo_purchase") ? "🛡️" : tx.type === "claim" ? "💰" : "📋"}
+                        </span>
+                        <div>
+                          <div style={{ fontSize: 13, color: T.tx }}>{desc}</div>
+                          <div style={{ fontSize: 11, color: T.tx4, marginTop: 2 }}>
+                            {new Date(tx.time).toLocaleString()}
+                            {tx.signature && <span style={{ marginLeft: 8, fontFamily: fm }}>{shortSig(tx.signature)}</span>}
+                          </div>
                         </div>
                       </div>
+                      {tx.amount !== undefined && tx.amount !== 0 && (
+                        <div style={{ fontFamily: fm, fontSize: 14, fontWeight: 600, color: tx.amount > 0 ? T.gold : T.error }}>
+                          {tx.amount > 0 ? "+" : ""}{n(tx.amount)} ETH
+                        </div>
+                      )}
                     </div>
-                    {tx.amount !== undefined && tx.amount !== 0 && (
-                      <div style={{ fontFamily: fm, fontSize: 14, fontWeight: 600, color: tx.amount > 0 ? T.gold : T.error }}>
-                        {tx.amount > 0 ? "+" : ""}{n(tx.amount)} RLO
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           )}
 
-          {/* Network Info */}
-          <div style={{ marginTop: 24, padding: "16px", background: T.raised, borderRadius: 10, fontSize: 12, color: T.tx4 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <span>{$("protocol")}</span>
-              <span style={{ color: T.tx2 }}>ChainSure Protocol</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <span>{$("network")}</span>
-              <span style={{ color: T.tx2 }}>Rialo Devnet</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span>{$("contract")}</span>
-              <span style={{ fontFamily: fm, color: T.tx2 }}>{shortAddr(PROGRAM_ID)}</span>
-            </div>
+          {/* Info */}
+          <div style={{ marginTop: 24, padding: "16px", background: T.raised, borderRadius: 10, fontSize: 12, color: T.tx4, textAlign: "center" }}>
+            ChainSure · Demo
           </div>
         </div>
       );
@@ -2068,11 +2462,9 @@
 
     function LangProvider({ children }) {
       const [lang, setLang] = useState(() => {
-        // 尝试从浏览器获取语言
         const browserLang = navigator.language.split('-')[0];
-        return ['zh', 'en', 'ja', 'ko'].includes(browserLang) ? browserLang : 'zh';
+        return ['en', 'zh', 'ja', 'ko'].includes(browserLang) ? browserLang : 'en';
       });
-      
       const $ = (key, params) => t(lang, key, params);
       
       return (
