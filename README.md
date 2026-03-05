@@ -207,10 +207,6 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ## Contact
 
-- Website: [chainsure.app](https://chainsure.app)
-- Twitter: [@ChainSureDAO](https://twitter.com/ChainSureDAO)
-- Discord: [ChainSure Community](https://discord.gg/chainsure)
-- Email: dev@chainsure.app
 
 ---
 
