@@ -122,6 +122,43 @@
         product_auto: "车险",
         product_life: "寿险",
         coming_soon: "即将上线",
+        updating_soon: "即将更新",
+        dev_mode: "开发中",
+        
+        // NFT
+        product_nft: "NFT Mint",
+        nft_title: "NFT 铸造",
+        nft_desc: "铸造专属链上保险 NFT，开发中敬请期待",
+        nft_dev_badge: "开发中",
+        nft_collection: "ChainSure 保险 NFT",
+        nft_collection_desc: "每一份保单都是独一无二的链上资产",
+        nft_feature1: "链上保单 NFT 化",
+        nft_feature2: "可转让 / 可交易",
+        nft_feature3: "稀有度分级系统",
+        nft_feature4: "持有人专属权益",
+        nft_mint_btn: "立即 Mint (开发中)",
+        nft_notify: "上线提醒",
+        nft_notify_sent: "已记录，上线后第一时间通知您",
+        nft_preview: "预览",
+        
+        // World Cup
+        product_worldcup: "世界杯",
+        worldcup_title: "2026 世界杯保障",
+        worldcup_desc: "为您最支持的球队投保，赢球赔付，智能合约全程透明",
+        worldcup_select_team: "选择球队",
+        worldcup_select_match: "选择赛事",
+        worldcup_bet_win: "赢球赔付",
+        worldcup_bet_draw: "平局赔付",
+        worldcup_group: "小组赛",
+        worldcup_r16: "16强",
+        worldcup_qf: "8强",
+        worldcup_sf: "4强",
+        worldcup_final: "决赛",
+        worldcup_odds: "赔率",
+        worldcup_insure_btn: "立即投保",
+        worldcup_match_date: "比赛日期",
+        worldcup_venue: "赛场",
+        worldcup_host: "2026年 美国/加拿大/墨西哥",
         
         // Flight Selection
         select_flight: "选择航班",
@@ -290,6 +327,43 @@
         product_auto: "Auto",
         product_life: "Life",
         coming_soon: "Soon",
+        updating_soon: "Updating Soon",
+        dev_mode: "Dev",
+        
+        // NFT
+        product_nft: "NFT Mint",
+        nft_title: "NFT Minting",
+        nft_desc: "Mint exclusive on-chain insurance NFTs — coming soon",
+        nft_dev_badge: "In Development",
+        nft_collection: "ChainSure Insurance NFT",
+        nft_collection_desc: "Every policy becomes a unique on-chain asset",
+        nft_feature1: "Policy NFT tokenization",
+        nft_feature2: "Transferable & tradeable",
+        nft_feature3: "Rarity tier system",
+        nft_feature4: "Holder exclusive benefits",
+        nft_mint_btn: "Mint Now (Coming Soon)",
+        nft_notify: "Notify Me",
+        nft_notify_sent: "Registered! We'll notify you at launch",
+        nft_preview: "Preview",
+        
+        // World Cup
+        product_worldcup: "World Cup",
+        worldcup_title: "2026 World Cup Protection",
+        worldcup_desc: "Insure your favorite team. Win = payout. Smart contract transparent throughout.",
+        worldcup_select_team: "Select Team",
+        worldcup_select_match: "Select Match",
+        worldcup_bet_win: "Win Payout",
+        worldcup_bet_draw: "Draw Payout",
+        worldcup_group: "Group Stage",
+        worldcup_r16: "Round of 16",
+        worldcup_qf: "Quarterfinal",
+        worldcup_sf: "Semifinal",
+        worldcup_final: "Final",
+        worldcup_odds: "Odds",
+        worldcup_insure_btn: "Get Insured",
+        worldcup_match_date: "Match Date",
+        worldcup_venue: "Venue",
+        worldcup_host: "2026 · USA / Canada / Mexico",
         
         // Flight
         select_flight: "Select Flight",
@@ -720,10 +794,11 @@
     // Product Lines
     const PRODUCTS = [
       { id: "flight", nameKey: "product_flight", icon: "✈️", active: true, color: "#3b82f6" },
-      { id: "logistics", nameKey: "product_logistics", icon: "📦", active: true, color: "#8b5cf6" },
-      { id: "auto", nameKey: "product_auto", icon: "🚗", active: true, color: "#10b981" },
-      { id: "health", nameKey: "product_health", icon: "🏥", active: false, color: "#ef4444" },
-      { id: "life", nameKey: "product_life", icon: "❤️", active: false, color: "#ec4899" },
+      { id: "worldcup", nameKey: "product_worldcup", icon: "⚽", active: true, color: "#f59e0b" },
+      { id: "logistics", nameKey: "product_logistics", icon: "📦", active: false, color: "#8b5cf6", updating: true },
+      { id: "auto", nameKey: "product_auto", icon: "🚗", active: false, color: "#10b981", updating: true },
+      { id: "health", nameKey: "product_health", icon: "🏥", active: false, color: "#ef4444", updating: true },
+      { id: "life", nameKey: "product_life", icon: "❤️", active: false, color: "#ec4899", updating: true },
     ];
     
     // Coverage plans
@@ -1289,11 +1364,93 @@
         return demoPolicy;
       };
 
+      // 世界杯投保 → 写入全局 policies
+      const purchaseWCPolicy = async ({ match, team, betType, premium, payout, odds }) => {
+        await sleep(1200);
+        const sig = [...Array(64)].map(() => (Math.random()*16|0).toString(16)).join("");
+        const addr = "wc_policy_" + Date.now().toString(36);
+        const policy = {
+          address: addr,
+          owner: wallet,
+          type: "worldcup",
+          // worldcup fields
+          wcMatch: match,
+          wcTeam: team,
+          wcBetType: betType,
+          wcOdds: odds,
+          // common fields
+          payoutAmount: BigInt(payout) * KELVIN_PER_ETH,
+          premiumPaid: BigInt(premium) * KELVIN_PER_ETH,
+          status: PolicyStatus.Active,
+          createdAt: Date.now(),
+          settledAt: null,
+          txSignature: sig,
+        };
+        setPolicies(prev => [policy, ...prev]);
+        setBalance(prev => prev - BigInt(premium) * KELVIN_PER_ETH);
+        addTx({ type: "wc_purchase", time: Date.now(), amount: -premium, signature: sig,
+          desc: team.flag + " " + team.name + " 世界杯保单" });
+        return policy;
+      };
+
+      // 世界杯结算 → 写入全局 claims
+      const settleWCPolicy = async (policy, onLog) => {
+        const log = (msg) => onLog && onLog(msg);
+        log("⏳ 发起链上结算请求...");
+        await sleep(700);
+        log("🔍 查询 " + policy.wcMatch.date + " " + policy.wcTeam.flag + " " + policy.wcTeam.name + " 比赛结果...");
+        await sleep(1000);
+        const won = Math.random() < 0.6;
+        const score = won
+          ? (policy.wcBetType === "win" ? "2 - 1（主队胜）" : "1 - 1（平局）")
+          : (policy.wcBetType === "win" ? "0 - 2（客队胜）" : "3 - 0（非平局）");
+        log("📊 比赛结果：" + score);
+        await sleep(800);
+        const sig = [...Array(64)].map(() => (Math.random()*16|0).toString(16)).join("");
+        if (won) {
+          log("✅ 符合理赔条件，触发智能合约转账...");
+          await sleep(900);
+          const payoutETH = Number(policy.payoutAmount / KELVIN_PER_ETH);
+          log("💰 赔付 +" + payoutETH + " ETH 已到账！");
+          const claim = {
+            address: "wc_claim_" + Date.now().toString(36),
+            policy: policy.address,
+            owner: wallet,
+            type: "worldcup",
+            amount: policy.payoutAmount,
+            wcTeam: policy.wcTeam,
+            wcMatch: policy.wcMatch,
+            wcResultScore: score,
+            timestamp: Date.now(),
+            transferSignature: sig,
+          };
+          setClaims(prev => [claim, ...prev]);
+          setBalance(prev => prev + policy.payoutAmount);
+          addTx({ type: "wc_claim", time: Date.now(),
+            amount: Number(policy.payoutAmount / KELVIN_PER_ETH), signature: sig,
+            desc: policy.wcTeam.flag + " " + policy.wcTeam.name + " 世界杯理赔" });
+        } else {
+          log("❌ 未达理赔条件，保单结算完成");
+          await sleep(600);
+          log("📋 保单已标记为已过期");
+          addTx({ type: "wc_expire", time: Date.now(), amount: 0, signature: sig,
+            desc: policy.wcTeam.flag + " " + policy.wcTeam.name + " 世界杯保单过期" });
+        }
+        setPolicies(prev => prev.map(p =>
+          p.address === policy.address
+            ? { ...p, status: won ? PolicyStatus.Claimed : PolicyStatus.Expired,
+                settledAt: Date.now(), wcResultScore: score }
+            : p
+        ));
+        return { won, score, sig };
+      };
+
       return (
         <AppContext.Provider value={{
           wallet, balance, policies, claims, txHistory, page, loading,
           setPage, connect, disconnect, purchasePolicy, settlePolicy, refreshData, addTx,
           getTodayPolicyCount, canPurchaseMore, addDemoPolicy,
+          purchaseWCPolicy, settleWCPolicy,
         }}>
           {children}
         </AppContext.Provider>
@@ -1690,31 +1847,32 @@
             {PRODUCTS.map(p => (
               <button 
                 key={p.id} 
-                onClick={() => p.active && setProduct(p.id)}
-                disabled={!p.active}
+                onClick={() => (p.active || p.id === 'worldcup') && setProduct(p.id)}
+                disabled={!p.active && p.id !== 'worldcup'}
                 style={{
                   padding: "12px 20px", 
                   borderRadius: 12,
-                  border: "1px solid " + (product === p.id ? T.goldBd : p.active ? T.b : "transparent"),
+                  border: "1px solid " + (product === p.id ? T.goldBd : (p.active || p.id === 'worldcup') ? T.b : "transparent"),
                   background: product === p.id 
                     ? "linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(180,140,50,0.06) 100%)" 
-                    : p.active ? "rgba(20,20,25,0.6)" : "rgba(20,20,25,0.3)",
-                  opacity: p.active ? 1 : 0.5,
-                  cursor: p.active ? "pointer" : "not-allowed",
+                    : (p.active || p.id === 'worldcup') ? "rgba(20,20,25,0.6)" : "rgba(20,20,25,0.3)",
+                  opacity: (p.active || p.id === 'worldcup') ? 1 : 0.5,
+                  cursor: (p.active || p.id === 'worldcup') ? "pointer" : "not-allowed",
                   display: "flex", alignItems: "center", gap: 10,
                   transition: "all 0.25s ease",
                   boxShadow: product === p.id ? "0 4px 20px rgba(212,175,55,0.1)" : "none",
                   fontFamily: ff, whiteSpace: "nowrap"
                 }}
               >
-                <span style={{ fontSize: 20, filter: p.active ? "none" : "grayscale(1)" }}>{p.icon}</span>
+                <span style={{ fontSize: 20, filter: (p.active || p.id === 'worldcup') ? "none" : "grayscale(1)" }}>{p.icon}</span>
                 <span style={{ 
                   fontSize: 13, fontWeight: product === p.id ? 600 : 500, 
-                  color: product === p.id ? T.gold : p.active ? T.tx2 : T.tx4 
+                  color: product === p.id ? T.gold : (p.active || p.id === 'worldcup') ? T.tx2 : T.tx4 
                 }}>
                   {$(p.nameKey)}
                 </span>
-                {!p.active && <Badge variant="default">{$("coming_soon")}</Badge>}
+                {!p.active && !p.devMode && <Badge variant="default">{p.updating ? $("updating_soon") : $("coming_soon")}</Badge>}
+                {p.devMode && <Badge variant="warning">{$("dev_mode")}</Badge>}
               </button>
             ))}
           </div>
@@ -1723,17 +1881,27 @@
           <div style={{ marginBottom: 32 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
               <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", color: T.tx }}>
-                {product === "flight" ? $("page_title") : product === "logistics" ? $("page_title_logistics") : $("page_title_auto")}
+                {product === "flight" ? $("page_title") : 
+                 product === "logistics" ? $("page_title_logistics") : 
+                 product === "auto" ? $("page_title_auto") :
+                 product === "worldcup" ? $("worldcup_title") :
+                 $("page_title")}
               </h1>
-              <Badge variant="gold">DEMO</Badge>
+              
             </div>
             <p style={{ fontSize: 14, color: T.tx3, lineHeight: 1.6, maxWidth: 520 }}>
               {product === "flight" ? $("page_desc", { threshold: DELAY_THRESHOLD }) : 
-               product === "logistics" ? $("page_desc_logistics") : $("page_desc_auto")}
+               product === "logistics" ? $("page_desc_logistics") : 
+               product === "auto" ? $("page_desc_auto") :
+               product === "worldcup" ? $("worldcup_desc") :
+               $("page_desc", { threshold: DELAY_THRESHOLD })}
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: 28 }}>
+          {/* World Cup Page */}
+          {product === "worldcup" && <WorldCupSection />}
+
+          {product === "flight" && <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: 28 }}>
             {/* Left: Selection */}
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {/* Flight List */}
@@ -1972,19 +2140,679 @@
 
               {/* Info */}
               <div style={{ fontSize: 11, color: T.tx4, textAlign: "center", padding: "8px 0" }}>
-                ChainSure · Demo
+                ChainSure
               </div>
             </div>
+          </div>}
+
+          {/* NFT Mint — 固定展示在页面底部 */}
+          <div style={{ marginTop: 60 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent)" }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#c084fc", letterSpacing: "0.08em", textTransform: "uppercase" }}>🎨 NFT Mint · 开发中</span>
+              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent)" }} />
+            </div>
+            <NFTMintSection />
           </div>
         </div>
       );
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // PAGE: POLICIES (保单列表)
+    // NFT MINT SECTION
     // ══════════════════════════════════════════════════════════════════════════
+    function NFTMintSection() {
+      const { $ } = useLang();
+      const [notified, setNotified] = useState(false);
+
+      const nfts = [
+        { id: 1, name: "ChainSure #001", rarity: "Legendary", rarityColor: "#d4af37", emoji: "✈️", desc: "Flight · Gold Tier" },
+        { id: 2, name: "ChainSure #042", rarity: "Epic",      rarityColor: "#a855f7", emoji: "🌐", desc: "Multi-Chain · Purple" },
+        { id: 3, name: "ChainSure #128", rarity: "Rare",      rarityColor: "#3b82f6", emoji: "🛡️", desc: "Shield · Blue Tier" },
+      ];
+
+      const progress = [
+        { label: "智能合约", pct: 65, color: "#a855f7" },
+        { label: "Mint UI",  pct: 40, color: "#d4af37" },
+        { label: "元数据存储", pct: 30, color: "#3b82f6" },
+        { label: "市场集成", pct: 10, color: "#10b981" },
+      ];
+
+      const features = [
+        { icon: "🔗", label: "链上保单 NFT 化" },
+        { icon: "💱", label: "可转让 / 可交易" },
+        { icon: "💎", label: "稀有度分级系统" },
+        { icon: "👑", label: "持有人专属权益" },
+      ];
+
+      return (
+        <div style={{ animation: "fadeIn 0.4s ease" }}>
+
+          {/* ── 顶部标题栏 ── */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            marginBottom: 28, padding: "18px 24px", borderRadius: 14,
+            background: "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(15,15,18,0.98) 100%)",
+            border: "1px solid rgba(168,85,247,0.2)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <span style={{ fontSize: 28 }}>🎨</span>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#c084fc" }}>ChainSure NFT Mint</div>
+                <div style={{ fontSize: 12, color: T.tx4, marginTop: 2 }}>每份保单铸造为独一无二的链上资产</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <Badge variant="warning">🚧 开发中</Badge>
+              <div style={{
+                padding: "6px 14px", borderRadius: 8,
+                background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.25)",
+                fontSize: 12, color: "#c084fc", fontWeight: 600
+              }}>总量 10,000</div>
+            </div>
+          </div>
+
+          {/* ── 主体三列 ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 20 }}>
+
+            {/* 列1: NFT 预览卡 */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: T.tx4, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+                NFT 预览
+              </div>
+              {nfts.map(nft => (
+                <div key={nft.id} style={{
+                  display: "flex", alignItems: "center", gap: 14,
+                  padding: "14px 16px", borderRadius: 12,
+                  background: "rgba(22,22,28,0.9)",
+                  border: "1px solid " + T.b,
+                  transition: "border-color 0.2s",
+                }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 10, flexShrink: 0,
+                    background: `radial-gradient(circle at 40% 40%, ${nft.rarityColor}33, transparent 70%), linear-gradient(135deg, ${nft.rarityColor}18, #08080a)`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 22, border: "1px solid " + nft.rarityColor + "30",
+                  }}>{nft.emoji}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
+                      <span style={{ fontFamily: fm, fontSize: 13, fontWeight: 700, color: T.tx }}>{nft.name}</span>
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 4, flexShrink: 0,
+                        background: nft.rarityColor + "18", color: nft.rarityColor,
+                        border: "1px solid " + nft.rarityColor + "35",
+                        letterSpacing: "0.04em", textTransform: "uppercase"
+                      }}>{nft.rarity}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: T.tx4, marginTop: 3 }}>{nft.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 列2: 开发进度 */}
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: T.tx4, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 16 }}>
+                开发进度
+              </div>
+              <div style={{
+                flex: 1, padding: "20px", borderRadius: 12,
+                background: "rgba(22,22,28,0.9)", border: "1px solid " + T.b,
+                display: "flex", flexDirection: "column", justifyContent: "space-between"
+              }}>
+                {progress.map(item => (
+                  <div key={item.label}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                      <span style={{ fontSize: 12, color: T.tx3 }}>{item.label}</span>
+                      <span style={{ fontFamily: fm, fontSize: 12, fontWeight: 600, color: item.color }}>{item.pct}%</span>
+                    </div>
+                    <div style={{ height: 5, borderRadius: 5, background: "rgba(255,255,255,0.05)", overflow: "hidden", marginBottom: 18 }}>
+                      <div style={{
+                        height: "100%", width: item.pct + "%",
+                        background: `linear-gradient(90deg, ${item.color}99, ${item.color})`,
+                        borderRadius: 5, transition: "width 1.2s ease"
+                      }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 列3: 功能 + 提醒 */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: T.tx4, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+                核心功能
+              </div>
+              {/* 功能列表 */}
+              <div style={{
+                borderRadius: 12, background: "rgba(22,22,28,0.9)",
+                border: "1px solid " + T.b, overflow: "hidden"
+              }}>
+                {features.map((f, i) => (
+                  <div key={i} style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "13px 16px",
+                    borderBottom: i < features.length - 1 ? "1px solid " + T.b : "none",
+                  }}>
+                    <span style={{ fontSize: 18, width: 24, textAlign: "center" }}>{f.icon}</span>
+                    <span style={{ fontSize: 13, color: T.tx2 }}>{f.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 上线提醒 */}
+              <div style={{
+                padding: "16px", borderRadius: 12,
+                background: notified ? T.successBg : "rgba(168,85,247,0.06)",
+                border: "1px solid " + (notified ? T.successBd : "rgba(168,85,247,0.2)"),
+                textAlign: "center"
+              }}>
+                {notified ? (
+                  <div style={{ fontSize: 13, color: T.success, fontWeight: 600 }}>
+                    ✅ 已登记，上线第一时间通知您
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 12, color: T.tx3, marginBottom: 10 }}>
+                      🔔 上线时通知我
+                    </div>
+                    <button onClick={() => setNotified(true)} style={{
+                      width: "100%", height: 36, borderRadius: 8,
+                      background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)",
+                      color: "#c084fc", fontSize: 12, fontWeight: 600,
+                      cursor: "pointer", fontFamily: ff
+                    }}>立即登记</button>
+                  </>
+                )}
+              </div>
+
+              {/* Mint 按钮 */}
+              <button disabled style={{
+                width: "100%", height: 44, borderRadius: 10,
+                background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)",
+                color: "rgba(192,132,252,0.45)", fontSize: 13, fontWeight: 600,
+                cursor: "not-allowed", fontFamily: ff,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8
+              }}>
+                <span>🔒</span> Mint Now（开发中）
+              </button>
+            </div>
+
+          </div>
+        </div>
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // WORLD CUP SECTION
+    // ══════════════════════════════════════════════════════════════════════════
+    function WorldCupSection() {
+      const { wallet, connect, balance, purchaseWCPolicy, settleWCPolicy, policies, setPage } = useApp();
+      const { $ } = useLang();
+      const [selectedTeam, setSelectedTeam] = useState(null);
+      const [selectedMatch, setSelectedMatch] = useState(0);
+      const [betType, setBetType] = useState("win");
+      const [planIdx, setPlanIdx] = useState(1);
+      const [busy, setBusy] = useState(false);
+      const [settlingId, setSettlingId] = useState(null);
+      const [settleLog, setSettleLog] = useState([]);
+      const [tab, setTab] = useState("insure"); // "insure" | "records"
+      const bets = policies.filter(p => p.type === "worldcup");
+
+      const teams = [
+        { id: "bra", name: "Brazil",      flag: "🇧🇷", group: "A", odds: { win: 2.1, draw: 3.4 } },
+        { id: "arg", name: "Argentina",   flag: "🇦🇷", group: "B", odds: { win: 1.9, draw: 3.6 } },
+        { id: "fra", name: "France",      flag: "🇫🇷", group: "C", odds: { win: 2.2, draw: 3.2 } },
+        { id: "eng", name: "England",     flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", group: "D", odds: { win: 2.4, draw: 3.1 } },
+        { id: "ger", name: "Germany",     flag: "🇩🇪", group: "E", odds: { win: 2.3, draw: 3.3 } },
+        { id: "esp", name: "Spain",       flag: "🇪🇸", group: "F", odds: { win: 2.0, draw: 3.5 } },
+        { id: "prt", name: "Portugal",    flag: "🇵🇹", group: "G", odds: { win: 2.5, draw: 3.0 } },
+        { id: "ned", name: "Netherlands", flag: "🇳🇱", group: "H", odds: { win: 2.6, draw: 3.1 } },
+        { id: "jpn", name: "Japan",       flag: "🇯🇵", group: "C", odds: { win: 3.5, draw: 3.2 } },
+        { id: "kor", name: "South Korea", flag: "🇰🇷", group: "H", odds: { win: 4.2, draw: 3.0 } },
+        { id: "usa", name: "USA",         flag: "🇺🇸", group: "B", odds: { win: 3.8, draw: 3.1 } },
+        { id: "mor", name: "Morocco",     flag: "🇲🇦", group: "F", odds: { win: 4.0, draw: 3.3 } },
+      ];
+
+      const matches = [
+        { id: 1, home: "bra", away: "arg", stage: "4强", date: "2026-07-07", venue: "MetLife Stadium, New York" },
+        { id: 2, home: "fra", away: "eng", stage: "4强", date: "2026-07-08", venue: "AT&T Stadium, Dallas" },
+        { id: 3, home: "ger", away: "esp", stage: "8强", date: "2026-06-28", venue: "SoFi Stadium, LA" },
+        { id: 4, home: "prt", away: "ned", stage: "8强", date: "2026-06-29", venue: "Estadio Azteca, Mexico City" },
+      ];
+
+      const plans = [
+        { premium: 50  },
+        { premium: 100 },
+        { premium: 200 },
+        { premium: 500 },
+      ];
+
+      const getTeam = (id) => teams.find(t => t.id === id);
+      const selTeam  = teams.find(t => t.id === selectedTeam);
+      const selMatch = matches[selectedMatch];
+      const selPlan  = plans[planIdx];
+      const odds     = selTeam ? selTeam.odds[betType] : 2.1;
+      const payout   = selPlan ? Math.round(selPlan.premium * odds) : 0;
+
+      // ── 投保 ──
+      const handleInsure = async () => {
+        if (!wallet) { await connect(); return; }
+        if (!selectedTeam) return;
+        setBusy(true);
+        await purchaseWCPolicy({ match: selMatch, team: selTeam, betType, premium: selPlan.premium, payout, odds });
+        setBusy(false);
+        setTab("records");
+      };
+
+      // ── 演示结算 ──
+      const handleSettle = async (bet) => {
+        if (settlingId) return;
+        setSettlingId(bet.address);
+        setSettleLog([]);
+        await settleWCPolicy(bet, (msg) => setSettleLog(prev => [...prev, msg]));
+        setSettlingId(null);
+      };
+
+      // ── 添加演示保单 ──
+      const handleDemo = async () => {
+        if (!wallet) { await connect(); return; }
+        const demoMatch = matches[0];
+        const demoTeam  = getTeam("bra");
+        const demoBet = await purchaseWCPolicy({
+          match: demoMatch, team: demoTeam, betType: "win",
+          premium: 100, payout: Math.round(100 * demoTeam.odds.win), odds: demoTeam.odds.win,
+        });
+        // mark as demo
+        demoBet.isDemo = true;
+        setTab("records");
+        await new Promise(r => setTimeout(r, 300));
+        handleSettle(demoBet);
+      };
+
+      const statusStyle = (s) => ({
+        [PolicyStatus.Active]:  { bg: T.warnBg,    bd: T.warnBd,    c: T.warn,    label: "待结算" },
+        [PolicyStatus.Claimed]: { bg: T.successBg, bd: T.successBd, c: T.success, label: "已赔付" },
+        [PolicyStatus.Expired]: { bg: T.errorBg,   bd: T.errorBd,   c: T.error,   label: "已过期" },
+      }[s] || { bg: T.warnBg, bd: T.warnBd, c: T.warn, label: "待结算" });
+
+      return (
+        <div style={{ animation: "fadeIn 0.4s ease" }}>
+          {/* ── 顶部横幅 ── */}
+          <div style={{
+            marginBottom: 24, padding: "16px 24px", borderRadius: 14,
+            background: "linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(212,175,55,0.06) 100%)",
+            border: "1px solid rgba(245,158,11,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "space-between"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <span style={{ fontSize: 32 }}>🏆</span>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#fbbf24" }}>FIFA World Cup 2026™</div>
+                <div style={{ fontSize: 12, color: T.tx3, marginTop: 2 }}>2026 · USA / Canada / Mexico · 48 Teams</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {/* 一键演示 */}
+              <button onClick={handleDemo} style={{
+                height: 36, padding: "0 16px", borderRadius: 8,
+                background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.3)",
+                color: "#fbbf24", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: ff
+              }}>⚡ 一键演示</button>
+              <Badge variant="warning">2026</Badge>
+            </div>
+          </div>
+
+          {/* ── Tab 切换 ── */}
+          <div style={{ display: "flex", gap: 4, marginBottom: 24, background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 4, width: "fit-content" }}>
+            {[["insure","🛡️ 立即投保"], ["records","📋 我的记录" + (bets.length ? ` (${bets.length})` : "")]].map(([k, label]) => (
+              <button key={k} onClick={() => setTab(k)} style={{
+                padding: "8px 20px", borderRadius: 8, border: "none",
+                background: tab === k ? T.goldBg : "transparent",
+                color: tab === k ? T.gold : T.tx4,
+                fontSize: 13, fontWeight: tab === k ? 600 : 500,
+                cursor: "pointer", fontFamily: ff,
+                border: tab === k ? "1px solid " + T.goldBd : "1px solid transparent",
+                transition: "all 0.2s ease"
+              }}>{label}</button>
+            ))}
+          </div>
+
+          {/* ══ TAB: 投保 ══ */}
+          {tab === "insure" && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 24 }}>
+              {/* 左列 */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                {/* 选赛事 */}
+                <Card>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: T.tx2, marginBottom: 14 }}>🏟️ 选择赛事</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {matches.map((m, i) => {
+                      const ht = getTeam(m.home), at = getTeam(m.away);
+                      const sel = selectedMatch === i;
+                      return (
+                        <div key={m.id} onClick={() => { setSelectedMatch(i); setSelectedTeam(null); }} style={{
+                          padding: "14px 18px", borderRadius: 12, cursor: "pointer",
+                          border: "1px solid " + (sel ? "rgba(245,158,11,0.45)" : T.b),
+                          background: sel ? "rgba(245,158,11,0.07)" : "rgba(255,255,255,0.02)",
+                          transition: "all 0.2s ease"
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                            <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 5,
+                              background: sel ? "rgba(245,158,11,0.2)" : T.wBg, color: sel ? "#fbbf24" : T.tx4,
+                              border: "1px solid " + (sel ? "rgba(245,158,11,0.3)" : T.b), textTransform: "uppercase" }}>
+                              {m.stage}
+                            </span>
+                            <span style={{ fontSize: 11, color: T.tx4, fontFamily: fm }}>{m.date}</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8 }}>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: sel ? T.tx : T.tx2 }}>{ht?.name}</span>
+                              <span style={{ fontSize: 20 }}>{ht?.flag}</span>
+                            </div>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: T.gold, padding: "4px 10px",
+                              background: T.goldBg, border: "1px solid " + T.goldBd, borderRadius: 6 }}>VS</span>
+                            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
+                              <span style={{ fontSize: 20 }}>{at?.flag}</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: sel ? T.tx : T.tx2 }}>{at?.name}</span>
+                            </div>
+                          </div>
+                          <div style={{ marginTop: 8, fontSize: 11, color: T.tx4 }}>📍 {m.venue}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+
+                {/* 选球队 */}
+                <Card>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: T.tx2, marginBottom: 14 }}>⚽ 支持哪支球队？</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    {[getTeam(selMatch.home), getTeam(selMatch.away)].filter(Boolean).map(team => {
+                      const sel = selectedTeam === team.id;
+                      return (
+                        <div key={team.id} onClick={() => setSelectedTeam(team.id)} style={{
+                          padding: "16px", borderRadius: 12, cursor: "pointer", textAlign: "center",
+                          border: "1px solid " + (sel ? "rgba(245,158,11,0.5)" : T.b),
+                          background: sel ? "rgba(245,158,11,0.09)" : "rgba(255,255,255,0.02)",
+                          transition: "all 0.25s ease",
+                          boxShadow: sel ? "0 4px 16px rgba(245,158,11,0.12)" : "none"
+                        }}>
+                          <div style={{ fontSize: 36, marginBottom: 6 }}>{team.flag}</div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: sel ? "#fbbf24" : T.tx2 }}>{team.name}</div>
+                          <div style={{ marginTop: 8, display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 5,
+                              background: T.successBg, color: T.success, border: "1px solid " + T.successBd }}>
+                              赢 ×{team.odds.win}
+                            </span>
+                            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 5,
+                              background: T.goldBg, color: T.gold, border: "1px solid " + T.goldBd }}>
+                              平 ×{team.odds.draw}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+
+                {/* 保障类型 */}
+                <Card>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: T.tx2, marginBottom: 12 }}>📊 保障类型</div>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    {[["win","🏆 赢球赔付"], ["draw","🤝 平局赔付"]].map(([k, label]) => (
+                      <button key={k} onClick={() => setBetType(k)} style={{
+                        flex: 1, padding: "13px", borderRadius: 10, cursor: "pointer", fontFamily: ff,
+                        border: "1px solid " + (betType === k ? T.goldBd : T.b),
+                        background: betType === k ? T.goldBg : "transparent",
+                        color: betType === k ? T.gold : T.tx3,
+                        fontSize: 13, fontWeight: betType === k ? 600 : 500,
+                        transition: "all 0.2s ease"
+                      }}>{label}</button>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+
+              {/* 右列: 订单确认 */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {/* 赛事摘要 */}
+                <Card style={{ background: T.raised }}>
+                  <div style={{ textAlign: "center", marginBottom: 14 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 5,
+                      background: "rgba(245,158,11,0.15)", color: "#fbbf24",
+                      border: "1px solid rgba(245,158,11,0.3)", textTransform: "uppercase" }}>
+                      {selMatch.stage}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 12 }}>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 32 }}>{getTeam(selMatch.home)?.flag}</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: T.tx2, marginTop: 5 }}>{getTeam(selMatch.home)?.name}</div>
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: T.gold, padding: "6px 12px",
+                      background: T.goldBg, borderRadius: 8, border: "1px solid " + T.goldBd }}>VS</div>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 32 }}>{getTeam(selMatch.away)?.flag}</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: T.tx2, marginTop: 5 }}>{getTeam(selMatch.away)?.name}</div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 11, color: T.tx4, textAlign: "center" }}>
+                    📅 {selMatch.date} · 📍 {selMatch.venue}
+                  </div>
+                </Card>
+
+                {/* 保额选择 */}
+                <Card>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: T.tx2, marginBottom: 10 }}>保额选择</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                    {plans.map((p, i) => {
+                      const po = Math.round(p.premium * (selTeam ? selTeam.odds[betType] : 2.1));
+                      const sel = planIdx === i;
+                      return (
+                        <div key={i} onClick={() => setPlanIdx(i)} style={{
+                          padding: "12px 16px", borderRadius: 9, cursor: "pointer",
+                          border: "1px solid " + (sel ? T.goldBd : T.b),
+                          background: sel ? T.goldBg : "transparent",
+                          display: "flex", justifyContent: "space-between", alignItems: "center",
+                          transition: "all 0.2s ease"
+                        }}>
+                          <span style={{ fontSize: 13, color: sel ? T.gold : T.tx2, fontWeight: sel ? 600 : 400 }}>
+                            {p.premium} ETH
+                          </span>
+                          <span style={{ fontFamily: fm, fontSize: 14, fontWeight: 700, color: T.gold }}>→ +{po} ETH</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+
+                {/* 订单摘要 */}
+                {selTeam ? (
+                  <div style={{ padding: "16px", borderRadius: 12,
+                    background: T.goldBg, border: "1px solid " + T.goldBd }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+                      <div style={{ textAlign: "center", padding: "10px", background: T.bg, borderRadius: 8 }}>
+                        <div style={{ fontSize: 10, color: T.tx4, marginBottom: 3 }}>保费</div>
+                        <div style={{ fontFamily: fm, fontSize: 20, fontWeight: 700 }}>{selPlan.premium}</div>
+                        <div style={{ fontSize: 10, color: T.tx4 }}>ETH</div>
+                      </div>
+                      <div style={{ textAlign: "center", padding: "10px",
+                        background: "rgba(212,175,55,0.12)", borderRadius: 8, border: "1px solid " + T.goldBd }}>
+                        <div style={{ fontSize: 10, color: T.gold, marginBottom: 3 }}>赔付</div>
+                        <div style={{ fontFamily: fm, fontSize: 20, fontWeight: 700, color: T.gold }}>+{payout}</div>
+                        <div style={{ fontSize: 10, color: T.gold }}>ETH</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 11, color: T.tx3, textAlign: "center" }}>
+                      {selTeam.flag} {selTeam.name} · {betType === "win" ? "赢球" : "平局"} · ×{odds} 赔率
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ padding: "14px", borderRadius: 12, textAlign: "center",
+                    background: T.raised, border: "1px solid " + T.b }}>
+                    <span style={{ fontSize: 13, color: T.tx4 }}>← 请选择球队</span>
+                  </div>
+                )}
+
+                <Button onClick={handleInsure} disabled={busy || !selectedTeam} size="lg" style={{ width: "100%" }}>
+                  {busy ? "处理中..." : !wallet ? "连接钱包" : !selectedTeam ? "请先选择球队" : `立即投保 ${selPlan.premium} ETH`}
+                </Button>
+
+                <div style={{ fontSize: 11, color: T.tx4, textAlign: "center" }}>
+                  ChainSure · FIFA World Cup 2026
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ══ TAB: 投注记录 ══ */}
+          {tab === "records" && (
+            <div>
+              {bets.length === 0 ? (
+                <Card>
+                  <div style={{ textAlign: "center", padding: "50px 24px" }}>
+                    <div style={{ fontSize: 48, opacity: 0.3, marginBottom: 16 }}>⚽</div>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: T.tx3, marginBottom: 8 }}>暂无投注记录</div>
+                    <div style={{ fontSize: 13, color: T.tx4, marginBottom: 20 }}>去投保选择心仪的球队吧</div>
+                    <Button onClick={() => setTab("insure")} variant="ghost">去投保</Button>
+                  </div>
+                </Card>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  {/* 汇总 */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 8 }}>
+                    {[
+                      { label: "全部保单", value: bets.length, color: T.tx },
+                      { label: "已赔付", value: bets.filter(b=>b.status===PolicyStatus.Claimed).length, color: T.success },
+                      { label: "累计赔付", value: bets.filter(b=>b.status===PolicyStatus.Claimed).reduce((s,b)=>s+Number(b.payoutAmount/KELVIN_PER_ETH),0) + " ETH", color: T.gold },
+                    ].map(item => (
+                      <div key={item.label} style={{ padding: "14px 16px", borderRadius: 12,
+                        background: "rgba(22,22,28,0.9)", border: "1px solid " + T.b, textAlign: "center" }}>
+                        <div style={{ fontSize: 10, color: T.tx4, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>{item.label}</div>
+                        <div style={{ fontFamily: fm, fontSize: 22, fontWeight: 700, color: item.color }}>{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 记录列表 */}
+                  {bets.map(bet => {
+                    const ss = statusStyle(bet.status);
+                    const isSettling = settlingId === bet.address;
+                    return (
+                      <Card key={bet.id} style={{ padding: "20px 22px" }}>
+                        {/* 顶行 */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <span style={{ fontSize: 28 }}>{bet.wcTeam.flag}</span>
+                            <div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                                <span style={{ fontSize: 15, fontWeight: 700, color: T.tx }}>{bet.wcTeam.name}</span>
+                                
+                              </div>
+                              <div style={{ fontSize: 12, color: T.tx4 }}>
+                                {bet.wcBetType === "win" ? "🏆 赢球赔付" : "🤝 平局赔付"} · ×{bet.wcOdds}
+                              </div>
+                            </div>
+                          </div>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "4px 10px", borderRadius: 6,
+                            background: ss.bg, color: ss.c, border: "1px solid " + ss.bd,
+                            letterSpacing: "0.04em", textTransform: "uppercase" }}>{ss.label}</span>
+                        </div>
+
+                        {/* 赛事信息 */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14,
+                          padding: "10px 14px", background: T.bg, borderRadius: 8 }}>
+                          <span style={{ fontSize: 18 }}>{getTeam(bet.wcMatch.home)?.flag}</span>
+                          <span style={{ fontSize: 12, color: T.tx3 }}>{getTeam(bet.wcMatch.home)?.name}</span>
+                          <span style={{ fontSize: 11, color: T.gold, fontWeight: 700 }}>VS</span>
+                          <span style={{ fontSize: 12, color: T.tx3 }}>{getTeam(bet.wcMatch.away)?.name}</span>
+                          <span style={{ fontSize: 18 }}>{getTeam(bet.wcMatch.away)?.flag}</span>
+                          <span style={{ marginLeft: "auto", fontSize: 10, color: T.tx4, fontFamily: fm }}>{bet.wcMatch.date}</span>
+                        </div>
+
+                        {/* 金额 */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                          <div style={{ display: "flex", gap: 20 }}>
+                            <div>
+                              <div style={{ fontSize: 10, color: T.tx4, marginBottom: 3 }}>保费</div>
+                              <div style={{ fontFamily: fm, fontSize: 16, fontWeight: 700 }}>{Number(bet.premiumPaid/KELVIN_PER_ETH)} ETH</div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 10, color: T.gold, marginBottom: 3 }}>可赔付</div>
+                              <div style={{ fontFamily: fm, fontSize: 16, fontWeight: 700, color: T.gold }}>+{Number(bet.payoutAmount/KELVIN_PER_ETH)} ETH</div>
+                            </div>
+                            {bet.status === PolicyStatus.Claimed && (
+                              <div>
+                                <div style={{ fontSize: 10, color: T.success, marginBottom: 3 }}>已到账</div>
+                                <div style={{ fontFamily: fm, fontSize: 16, fontWeight: 700, color: T.success }}>+{Number(bet.payoutAmount/KELVIN_PER_ETH)} ETH ✅</div>
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 10, color: T.tx4, fontFamily: fm, textAlign: "right" }}>
+                            <div>TX: {bet.txSignature ? bet.txSignature.slice(0,10) : ''}...</div>
+                            <div style={{ marginTop: 2 }}>{new Date(bet.createdAt).toLocaleString()}</div>
+                          </div>
+                        </div>
+
+                        {/* 比赛结果（已结算） */}
+                        {bet.wcResultScore && (
+                          <div style={{ marginBottom: 12, padding: "8px 12px", borderRadius: 8,
+                            background: bet.status === PolicyStatus.Claimed ? T.successBg : T.errorBg,
+                            border: "1px solid " + (bet.status === PolicyStatus.Claimed ? T.successBd : T.errorBd),
+                            fontSize: 12, color: bet.status === PolicyStatus.Claimed ? T.success : T.error }}>
+                            📊 比赛结果：{bet.wcResultScore}
+                          </div>
+                        )}
+
+                        {/* 结算进度日志（结算中） */}
+                        {isSettling && settleLog.length > 0 && (
+                          <div style={{ marginBottom: 12, padding: "12px 14px", borderRadius: 8,
+                            background: "rgba(212,175,55,0.06)", border: "1px solid " + T.goldBd }}>
+                            {settleLog.map((log, i) => (
+                              <div key={i} style={{ fontSize: 12, color: i === settleLog.length-1 ? T.gold : T.tx4,
+                                marginBottom: i < settleLog.length-1 ? 5 : 0, transition: "color 0.3s" }}>
+                                {log}
+                              </div>
+                            ))}
+                            <div style={{ marginTop: 8, display: "flex", gap: 4 }}>
+                              {[0,1,2].map(i => (
+                                <div key={i} style={{ width: 6, height: 6, borderRadius: "50%",
+                                  background: T.gold, opacity: 0.6,
+                                  animation: `fadeIn 0.5s ${i*0.2}s infinite alternate` }} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 结算按钮 */}
+                        {bet.status === PolicyStatus.Active && !isSettling && (
+                          <button onClick={() => handleSettle(bet)} style={{
+                            width: "100%", height: 38, borderRadius: 8,
+                            background: T.goldBg, border: "1px solid " + T.goldBd,
+                            color: T.gold, fontSize: 13, fontWeight: 600,
+                            cursor: "pointer", fontFamily: ff
+                          }}>⚡ 结算此保单</button>
+                        )}
+                        {isSettling && (
+                          <div style={{ textAlign: "center", fontSize: 12, color: T.gold, padding: "8px" }}>
+                            结算中...
+                          </div>
+                        )}
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+        // ══════════════════════════════════════════════════════════════════════════
     function PoliciesPage() {
-      const { wallet, policies, settlePolicy, setPage, addDemoPolicy, connect } = useApp();
+      const { wallet, policies, settlePolicy, settleWCPolicy, setPage, addDemoPolicy, connect } = useApp();
       const { $ } = useLang();
       const [settling, setSettling] = useState(null);
       const [settleStep, setSettleStep] = useState(0);
@@ -2024,16 +2852,27 @@
         setSettleResult(null);
         
         try {
-          const result = await settlePolicy(policy, (step, msg) => {
-            setSettleStep(step);
-            setSettleMsg(msg);
-          }, $);
-          setSettleResult(result);
+          if (policy.type === "worldcup") {
+            // 世界杯结算 — 用 log 消息更新 modal
+            const steps = ["⏳ 发起结算...", "🔍 查询比赛结果...", "📊 验证理赔条件...", "⚡ 链上执行...", "✅ 完成"];
+            let stepIdx = 0;
+            const result = await settleWCPolicy(policy, (msg) => {
+              stepIdx = Math.min(stepIdx + 1, 5);
+              setSettleStep(stepIdx);
+              setSettleMsg(msg);
+            });
+            setSettleResult({ hit: result.won, delayed: 0, wcResult: result.score });
+          } else {
+            const result = await settlePolicy(policy, (step, msg) => {
+              setSettleStep(step);
+              setSettleMsg(msg);
+            }, $);
+            setSettleResult(result);
+          }
         } catch (e) {
           console.error(e);
         }
         
-        // 3秒后关闭弹窗
         setTimeout(() => {
           setSettling(null);
           setSettleStep(0);
@@ -2110,12 +2949,25 @@
                   border: "1px solid " + (settleResult.hit ? T.successBd : T.warnBd),
                   borderRadius: 10, textAlign: "center"
                 }}>
-                  <div style={{ fontSize: 12, color: settleResult.hit ? T.success : T.warn, marginBottom: 4 }}>
-                    {$("delay_min", { min: settleResult.delayed })} {settleResult.hit ? "≥" : "<"} {DELAY_THRESHOLD} min
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: settleResult.hit ? T.success : T.tx2 }}>
-                    {settleResult.hit ? $("settle_condition_met") : $("settle_condition_not_met")}
-                  </div>
+                  {settleResult.wcResult ? (
+                    <>
+                      <div style={{ fontSize: 12, color: settleResult.hit ? T.success : T.warn, marginBottom: 4 }}>
+                        ⚽ 比赛结果：{settleResult.wcResult}
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: settleResult.hit ? T.success : T.tx2 }}>
+                        {settleResult.hit ? "✅ 理赔成功，已自动打款" : "📋 未达理赔条件，保单已结算"}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 12, color: settleResult.hit ? T.success : T.warn, marginBottom: 4 }}>
+                        {$("delay_min", { min: settleResult.delayed })} {settleResult.hit ? "≥" : "<"} {DELAY_THRESHOLD} min
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: settleResult.hit ? T.success : T.tx2 }}>
+                        {settleResult.hit ? $("settle_condition_met") : $("settle_condition_not_met")}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -2195,14 +3047,23 @@
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                           <div>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <span style={{ fontFamily: fm, fontSize: 20, fontWeight: 700 }}>{p.flightIata}</span>
+                              {p.type === "worldcup" ? (
+                                <span style={{ fontSize: 22 }}>{p.wcTeam?.flag}</span>
+                              ) : (
+                                <span style={{ fontFamily: fm, fontSize: 20, fontWeight: 700 }}>{p.flightIata}</span>
+                              )}
                               <Badge variant="success">{$("policy_active")}</Badge>
+                              {p.type === "worldcup" && <Badge variant="warning">⚽ 世界杯</Badge>}
                             </div>
                             <div style={{ fontSize: 13, color: T.tx3, marginTop: 6 }}>
-                              {p.depAirport} → {p.arrAirport}
+                              {p.type === "worldcup"
+                                ? p.wcTeam?.name + " · " + (p.wcBetType === "win" ? "赢球赔付" : "平局赔付") + " ×" + p.wcOdds
+                                : p.depAirport + " → " + p.arrAirport}
                             </div>
                             <div style={{ fontSize: 12, color: T.tx4, marginTop: 2 }}>
-                              {p.date} {p.scheduledDeparture}
+                              {p.type === "worldcup"
+                                ? p.wcMatch?.date + " · " + p.wcMatch?.venue
+                                : p.date + " " + p.scheduledDeparture}
                             </div>
                           </div>
                           <div style={{ textAlign: "right" }}>
@@ -2214,9 +3075,11 @@
                         </div>
                         <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid " + T.b, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div style={{ fontSize: 12, color: T.tx4 }}>
-                            {canSettle ? "✅ " + $("can_settle") : "⏰ " + $("waiting_flight", { date: p.date })}
+                            {p.type === "worldcup"
+                              ? "⚽ 待比赛结果结算"
+                              : canSettle ? "✅ " + $("can_settle") : "⏰ " + $("waiting_flight", { date: p.date })}
                           </div>
-                          {canSettle ? (
+                          {(p.type === "worldcup" || canSettle) ? (
                             <Button onClick={() => handleSettle(p)} disabled={isSettling} size="sm">
                               {isSettling ? $("settling") : $("settle_now")}
                             </Button>
@@ -2240,16 +3103,29 @@
                     const payoutETH = Number(p.payoutAmount / KELVIN_PER_ETH);
                     const isClaimed = p.status === PolicyStatus.Claimed;
                     return (
-                      <Card key={p.address} style={{ opacity: 0.7 }}>
+                      <Card key={p.address} style={{ opacity: 0.75 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                            <span style={{ fontFamily: fm, fontSize: 16, fontWeight: 600 }}>{p.flightIata}</span>
-                            <span style={{ fontSize: 12, color: T.tx4 }}>{p.date}</span>
+                            {p.type === "worldcup"
+                              ? <span style={{ fontSize: 20 }}>{p.wcTeam?.flag}</span>
+                              : <span style={{ fontFamily: fm, fontSize: 16, fontWeight: 600 }}>{p.flightIata}</span>}
+                            <span style={{ fontSize: 12, color: T.tx4 }}>
+                              {p.type === "worldcup" ? p.wcMatch?.date : p.date}
+                            </span>
+                            {p.type === "worldcup" && <Badge variant="warning">⚽ 世界杯</Badge>}
                             <Badge variant={isClaimed ? "success" : "error"}>
-                              {isClaimed ? `${$("claimed")} +${n(payoutETH)}` : `${$("expired")} (${$("delay_min", { min: p.actualDelayMinutes })})`}
+                              {isClaimed
+                                ? $("claimed") + " +" + n(payoutETH)
+                                : p.type === "worldcup"
+                                  ? $("expired") + (p.wcResultScore ? " · " + p.wcResultScore : "")
+                                  : $("expired") + " (" + $("delay_min", { min: p.actualDelayMinutes }) + ")"}
                             </Badge>
                           </div>
-                          <div style={{ fontSize: 12, color: T.tx4 }}>{p.depAirport} → {p.arrAirport}</div>
+                          <div style={{ fontSize: 12, color: T.tx4 }}>
+                            {p.type === "worldcup"
+                              ? p.wcTeam?.name + " · " + (p.wcBetType === "win" ? "赢球" : "平局")
+                              : p.depAirport + " → " + p.arrAirport}
+                          </div>
                         </div>
                       </Card>
                     );
@@ -2280,6 +3156,8 @@
       }
 
       const totalClaimed = claims.reduce((sum, c) => sum + Number(c.amount / KELVIN_PER_ETH), 0);
+      const wcClaims = claims.filter(c => c.type === 'worldcup');
+      const flightClaims = claims.filter(c => c.type !== 'worldcup');
 
       return (
         <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
@@ -2290,7 +3168,7 @@
               <Empty 
                 icon="💰" 
                 title={$("no_claims")}
-                desc={$("no_claims_desc", { threshold: DELAY_THRESHOLD })}
+                desc="航班延误超过 120 分钟 或 世界杯赢球/平局 将自动触发理赔"
                 action={<Button onClick={() => setPage("home")}>{$("go_insure")}</Button>}
               />
             </Card>
@@ -2300,7 +3178,17 @@
               <Card style={{ marginBottom: 24, background: T.goldBg, border: "1px solid " + T.goldBd }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <Stat label={$("total_claimed")} value={`+${n(totalClaimed)}`} sub="ETH" color={T.gold} />
-                  <div style={{ fontSize: 48, opacity: 0.3 }}>💰</div>
+                  <div style={{ display: "flex", gap: 16 }}>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 11, color: T.tx4, marginBottom: 4 }}>✈️ 航班</div>
+                      <div style={{ fontFamily: fm, fontSize: 18, fontWeight: 700 }}>{flightClaims.length}</div>
+                    </div>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 11, color: T.tx4, marginBottom: 4 }}>⚽ 世界杯</div>
+                      <div style={{ fontFamily: fm, fontSize: 18, fontWeight: 700 }}>{wcClaims.length}</div>
+                    </div>
+                    <div style={{ fontSize: 40, opacity: 0.25, alignSelf: "center" }}>💰</div>
+                  </div>
                 </div>
               </Card>
 
@@ -2316,10 +3204,15 @@
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                         <div>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            {c.type === "worldcup"
+                              ? <span style={{ fontSize: 22 }}>{c.wcTeam?.flag}</span>
+                              : null}
                             <span style={{ fontFamily: fm, fontSize: 16, fontWeight: 700 }}>
-                              {c.policy.split("_")[2]}
+                              {c.type === "worldcup" ? c.wcTeam?.name : c.policy.split("_")[2]}
                             </span>
-                            <Badge variant="warning">{$("delay_min", { min: c.delayMinutes })}</Badge>
+                            {c.type === "worldcup"
+                              ? <Badge variant="warning">⚽ 世界杯 · {c.wcResultScore || "赢球"}</Badge>
+                              : <Badge variant="warning">{$("delay_min", { min: c.delayMinutes })}</Badge>}
                           </div>
                           <div style={{ fontSize: 12, color: T.tx4, marginTop: 6 }}>
                             {new Date(c.timestamp).toLocaleString()}
@@ -2405,6 +3298,7 @@
                 else if (tx.type === "demo_purchase") desc = $("demo_purchased", { flight: tx.flightIata || "" });
                 else if (tx.type === "claim") desc = $("tx_claim", { flight: tx.flightIata || "", min: tx.delayMin || 0 });
                 else if (tx.type === "expire") desc = $("tx_expire", { flight: tx.flightIata || "", min: tx.delayMin || 0 });
+                else if (tx.type === "wc_purchase" || tx.type === "wc_claim" || tx.type === "wc_expire") desc = tx.desc || tx.type;
                 else desc = tx.desc || tx.type;
                 
                 return (
@@ -2412,7 +3306,7 @@
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                         <span style={{ fontSize: 20 }}>
-                          {tx.type === "connect" ? "🔗" : tx.type === "disconnect" ? "🔌" : (tx.type === "purchase" || tx.type === "demo_purchase") ? "🛡️" : tx.type === "claim" ? "💰" : "📋"}
+                          {tx.type === "connect" ? "🔗" : tx.type === "disconnect" ? "🔌" : (tx.type === "purchase" || tx.type === "demo_purchase" || tx.type === "wc_purchase") ? "🛡️" : (tx.type === "claim" || tx.type === "wc_claim") ? "💰" : "📋"}
                         </span>
                         <div>
                           <div style={{ fontSize: 13, color: T.tx }}>{desc}</div>
@@ -2436,7 +3330,7 @@
 
           {/* Info */}
           <div style={{ marginTop: 24, padding: "16px", background: T.raised, borderRadius: 10, fontSize: 12, color: T.tx4, textAlign: "center" }}>
-            ChainSure · Demo
+            ChainSure
           </div>
         </div>
       );
