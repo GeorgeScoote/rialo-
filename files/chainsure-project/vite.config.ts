@@ -12,6 +12,10 @@ export default defineConfig({
       '@sdk': path.resolve(__dirname, './src/sdk'),
       '@i18n': path.resolve(__dirname, './src/i18n'),
       '@styles': path.resolve(__dirname, './src/styles'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@theme': path.resolve(__dirname, './src/theme'),
+      '@lib': path.resolve(__dirname, './src/lib'),
+      '@state': path.resolve(__dirname, './src/state'),
     },
   },
   define: {

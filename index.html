@@ -9,18 +9,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      background: #08080a;
-      background-image: 
-        radial-gradient(ellipse at 20% 0%, rgba(212,175,55,0.03) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 100%, rgba(180,140,50,0.02) 0%, transparent 50%);
+    body {
+      background: #060a14;
+      background-image:
+        radial-gradient(ellipse at 18% 0%, rgba(34,211,238,0.10) 0%, transparent 55%),
+        radial-gradient(ellipse at 82% 100%, rgba(59,130,246,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%, rgba(14,165,233,0.03) 0%, transparent 70%);
       min-height: 100vh;
     }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(212,175,55,0.5); }
-    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(0deg); }
+    ::-webkit-scrollbar-thumb { background: rgba(34,211,238,0.35); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(34,211,238,0.6); }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(8) hue-rotate(140deg); }
     @keyframes shimmer {
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
@@ -37,50 +38,50 @@
     const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
 
     // ══════════════════════════════════════════════════════════════════════════
-    // THEME - Dark Luxury Gold
+    // THEME - Deep Blue Tech
     // ══════════════════════════════════════════════════════════════════════════
     const T = {
       // Background layers
-      bg: "#08080a", 
-      panel: "rgba(18,18,22,0.8)", 
-      raised: "rgba(28,28,35,0.9)",
-      card: "linear-gradient(145deg, rgba(22,22,28,0.95) 0%, rgba(15,15,18,0.98) 100%)",
-      
+      bg: "#060a14",
+      panel: "rgba(13,21,38,0.8)",
+      raised: "rgba(20,32,58,0.9)",
+      card: "linear-gradient(145deg, rgba(17,27,48,0.95) 0%, rgba(10,16,30,0.98) 100%)",
+
       // Border layers
-      b: "rgba(212,175,55,0.08)", 
-      b2: "rgba(212,175,55,0.15)",
-      b3: "rgba(212,175,55,0.25)",
-      
+      b: "rgba(34,211,238,0.10)",
+      b2: "rgba(34,211,238,0.18)",
+      b3: "rgba(34,211,238,0.30)",
+
       // Text layers
-      tx: "#f8f6f0", 
-      tx2: "#c4b998", 
-      tx3: "#8a8270", 
-      tx4: "#5c5a52",
-      
-      // Primary - Gold
-      gold: "#d4af37",
-      goldLight: "#e8c547",
-      goldDark: "#b8960c",
-      goldBg: "rgba(212,175,55,0.08)",
-      goldBd: "rgba(212,175,55,0.2)",
-      
-      // Accent white
-      w: "#fffef8", 
-      wBg: "rgba(255,254,248,0.05)", 
-      wBd: "rgba(255,254,248,0.12)",
-      
+      tx: "#eaf2ff",
+      tx2: "#9fb6d4",
+      tx3: "#5a7090",
+      tx4: "#3a4a64",
+
+      // Primary - Cyan
+      gold: "#22d3ee",
+      goldLight: "#67e8f9",
+      goldDark: "#0891b2",
+      goldBg: "rgba(34,211,238,0.10)",
+      goldBd: "rgba(34,211,238,0.28)",
+
+      // Accent blue
+      w: "#bfdbfe",
+      wBg: "rgba(96,165,250,0.08)",
+      wBd: "rgba(96,165,250,0.20)",
+
       // Status colors
-      success: "#7dd87d",
-      successBg: "rgba(125,216,125,0.1)",
-      successBd: "rgba(125,216,125,0.25)",
-      
-      error: "#e57373",
-      errorBg: "rgba(229,115,115,0.1)",
-      errorBd: "rgba(229,115,115,0.25)",
-      
-      warn: "#d4af37",
-      warnBg: "rgba(212,175,55,0.1)",
-      warnBd: "rgba(212,175,55,0.25)",
+      success: "#34d399",
+      successBg: "rgba(52,211,153,0.12)",
+      successBd: "rgba(52,211,153,0.30)",
+
+      error: "#f87171",
+      errorBg: "rgba(248,113,113,0.12)",
+      errorBd: "rgba(248,113,113,0.30)",
+
+      warn: "#fbbf24",
+      warnBg: "rgba(251,191,36,0.12)",
+      warnBd: "rgba(251,191,36,0.30)",
     };
     
     // Fonts
@@ -1563,9 +1564,9 @@
           shadow: "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)"
         },
         highlight: {
-          bg: `linear-gradient(145deg, rgba(212,175,55,0.08) 0%, rgba(15,15,18,0.98) 100%)`,
+          bg: `linear-gradient(145deg, rgba(34,211,238,0.08) 0%, rgba(10,16,30,0.98) 100%)`,
           bd: T.goldBd,
-          shadow: "0 4px 32px rgba(212,175,55,0.1), inset 0 1px 0 rgba(212,175,55,0.1)"
+          shadow: "0 4px 32px rgba(34,211,238,0.1), inset 0 1px 0 rgba(34,211,238,0.1)"
         }
       };
       const v = variants[variant];
@@ -1589,11 +1590,11 @@
     function Badge({ children, variant = "default" }) {
       const styles = {
         default: { bg: "rgba(255,254,248,0.06)", bd: "rgba(255,254,248,0.1)", c: T.tx2 },
-        warning: { bg: "rgba(212,175,55,0.12)", bd: "rgba(212,175,55,0.25)", c: T.gold },
+        warning: { bg: "rgba(34,211,238,0.12)", bd: "rgba(34,211,238,0.25)", c: T.gold },
         success: { bg: "rgba(125,216,125,0.1)", bd: "rgba(125,216,125,0.2)", c: T.success },
         error: { bg: "rgba(229,115,115,0.1)", bd: "rgba(229,115,115,0.2)", c: T.error },
-        info: { bg: "rgba(212,175,55,0.08)", bd: "rgba(212,175,55,0.15)", c: T.gold },
-        gold: { bg: "linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(180,140,50,0.15) 100%)", bd: T.goldBd, c: T.gold },
+        info: { bg: "rgba(34,211,238,0.08)", bd: "rgba(34,211,238,0.15)", c: T.gold },
+        gold: { bg: "linear-gradient(135deg, rgba(34,211,238,0.2) 0%, rgba(8,145,178,0.15) 100%)", bd: T.goldBd, c: T.gold },
       };
       const s = styles[variant] || styles.default;
       return (
@@ -1621,9 +1622,9 @@
       };
       const variants = {
         primary: { 
-          bg: "linear-gradient(135deg, #d4af37 0%, #b8960c 100%)", 
+          bg: "linear-gradient(135deg, #22d3ee 0%, #0891b2 100%)", 
           c: "#0a0a0a", 
-          shadow: "0 4px 16px rgba(212,175,55,0.3)",
+          shadow: "0 4px 16px rgba(34,211,238,0.3)",
           border: "none"
         },
         secondary: { 
@@ -1639,7 +1640,7 @@
           border: "1px solid " + T.errorBd
         },
         ghost: {
-          bg: "rgba(212,175,55,0.08)",
+          bg: "rgba(34,211,238,0.08)",
           c: T.gold,
           shadow: "none",
           border: "1px solid " + T.goldBd
@@ -1722,10 +1723,10 @@
               <div style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }} onClick={() => setPage("home")}>
                 <div style={{ 
                   width: 36, height: 36, borderRadius: 10, 
-                  background: "linear-gradient(135deg, #d4af37 0%, #a08520 100%)",
+                  background: "linear-gradient(135deg, #22d3ee 0%, #0e7490 100%)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 16, fontWeight: 800, color: "#0a0a0a",
-                  boxShadow: "0 4px 12px rgba(212,175,55,0.3)",
+                  boxShadow: "0 4px 12px rgba(34,211,238,0.3)",
                   letterSpacing: "-0.05em"
                 }}>CS</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -1807,7 +1808,7 @@
                 <div style={{ 
                   display: "flex", alignItems: "center", gap: 8, 
                   padding: "8px 16px", 
-                  background: "rgba(212,175,55,0.06)", 
+                  background: "rgba(34,211,238,0.06)", 
                   border: "1px solid " + T.goldBd,
                   borderRadius: 10 
                 }}>
@@ -1930,13 +1931,13 @@
                   borderRadius: 12,
                   border: "1px solid " + (product === p.id ? T.goldBd : (p.active || p.id === 'worldcup') ? T.b : "transparent"),
                   background: product === p.id 
-                    ? "linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(180,140,50,0.06) 100%)" 
-                    : (p.active || p.id === 'worldcup') ? "rgba(20,20,25,0.6)" : "rgba(20,20,25,0.3)",
+                    ? "linear-gradient(135deg, rgba(34,211,238,0.12) 0%, rgba(8,145,178,0.06) 100%)" 
+                    : (p.active || p.id === 'worldcup') ? "rgba(17,27,48,0.6)" : "rgba(17,27,48,0.3)",
                   opacity: (p.active || p.id === 'worldcup') ? 1 : 0.5,
                   cursor: (p.active || p.id === 'worldcup') ? "pointer" : "not-allowed",
                   display: "flex", alignItems: "center", gap: 10,
                   transition: "all 0.25s ease",
-                  boxShadow: product === p.id ? "0 4px 20px rgba(212,175,55,0.1)" : "none",
+                  boxShadow: product === p.id ? "0 4px 20px rgba(34,211,238,0.1)" : "none",
                   fontFamily: ff, whiteSpace: "nowrap"
                 }}
               >
@@ -2008,10 +2009,10 @@
                         cursor: "pointer",
                         border: "1px solid " + (sel ? T.goldBd : "rgba(255,255,255,0.04)"),
                         background: sel 
-                          ? "linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(20,20,25,0.9) 100%)" 
+                          ? "linear-gradient(135deg, rgba(34,211,238,0.08) 0%, rgba(17,27,48,0.9) 100%)" 
                           : "rgba(255,255,255,0.02)",
                         transition: "all 0.2s ease",
-                        boxShadow: sel ? "0 2px 12px rgba(212,175,55,0.1)" : "none"
+                        boxShadow: sel ? "0 2px 12px rgba(34,211,238,0.1)" : "none"
                       }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -2242,14 +2243,14 @@
       const [notified, setNotified] = useState(false);
 
       const nfts = [
-        { id: 1, name: "ChainSure #001", rarity: "Legendary", rarityColor: "#d4af37", emoji: "✈️", desc: "Flight · Gold Tier" },
+        { id: 1, name: "ChainSure #001", rarity: "Legendary", rarityColor: "#22d3ee", emoji: "✈️", desc: "Flight · Cyan Tier" },
         { id: 2, name: "ChainSure #042", rarity: "Epic",      rarityColor: "#a855f7", emoji: "🌐", desc: "Multi-Chain · Purple" },
         { id: 3, name: "ChainSure #128", rarity: "Rare",      rarityColor: "#3b82f6", emoji: "🛡️", desc: "Shield · Blue Tier" },
       ];
 
       const progress = [
         { label: "智能合约", pct: 65, color: "#a855f7" },
-        { label: "Mint UI",  pct: 40, color: "#d4af37" },
+        { label: "Mint UI",  pct: 40, color: "#22d3ee" },
         { label: "元数据存储", pct: 30, color: "#3b82f6" },
         { label: "市场集成", pct: 10, color: "#10b981" },
       ];
@@ -2268,7 +2269,7 @@
           <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
             marginBottom: 28, padding: "18px 24px", borderRadius: 14,
-            background: "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(15,15,18,0.98) 100%)",
+            background: "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(10,16,30,0.98) 100%)",
             border: "1px solid rgba(168,85,247,0.2)",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -2300,13 +2301,13 @@
                 <div key={nft.id} style={{
                   display: "flex", alignItems: "center", gap: 14,
                   padding: "14px 16px", borderRadius: 12,
-                  background: "rgba(22,22,28,0.9)",
+                  background: "rgba(17,27,48,0.9)",
                   border: "1px solid " + T.b,
                   transition: "border-color 0.2s",
                 }}>
                   <div style={{
                     width: 48, height: 48, borderRadius: 10, flexShrink: 0,
-                    background: `radial-gradient(circle at 40% 40%, ${nft.rarityColor}33, transparent 70%), linear-gradient(135deg, ${nft.rarityColor}18, #08080a)`,
+                    background: `radial-gradient(circle at 40% 40%, ${nft.rarityColor}33, transparent 70%), linear-gradient(135deg, ${nft.rarityColor}18, #060a14)`,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 22, border: "1px solid " + nft.rarityColor + "30",
                   }}>{nft.emoji}</div>
@@ -2333,7 +2334,7 @@
               </div>
               <div style={{
                 flex: 1, padding: "20px", borderRadius: 12,
-                background: "rgba(22,22,28,0.9)", border: "1px solid " + T.b,
+                background: "rgba(17,27,48,0.9)", border: "1px solid " + T.b,
                 display: "flex", flexDirection: "column", justifyContent: "space-between"
               }}>
                 {progress.map(item => (
@@ -2361,7 +2362,7 @@
               </div>
               {/* 功能列表 */}
               <div style={{
-                borderRadius: 12, background: "rgba(22,22,28,0.9)",
+                borderRadius: 12, background: "rgba(17,27,48,0.9)",
                 border: "1px solid " + T.b, overflow: "hidden"
               }}>
                 {features.map((f, i) => (
@@ -2517,7 +2518,7 @@
           {/* ── 顶部横幅 ── */}
           <div style={{
             marginBottom: 24, padding: "16px 24px", borderRadius: 14,
-            background: "linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(212,175,55,0.06) 100%)",
+            background: "linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(34,211,238,0.06) 100%)",
             border: "1px solid rgba(245,158,11,0.25)",
             display: "flex", alignItems: "center", justifyContent: "space-between"
           }}>
@@ -2714,7 +2715,7 @@
                         <div style={{ fontSize: 10, color: T.tx4 }}>ETH</div>
                       </div>
                       <div style={{ textAlign: "center", padding: "10px",
-                        background: "rgba(212,175,55,0.12)", borderRadius: 8, border: "1px solid " + T.goldBd }}>
+                        background: "rgba(34,211,238,0.12)", borderRadius: 8, border: "1px solid " + T.goldBd }}>
                         <div style={{ fontSize: 10, color: T.gold, marginBottom: 3 }}>赔付</div>
                         <div style={{ fontFamily: fm, fontSize: 20, fontWeight: 700, color: T.gold }}>+{payout}</div>
                         <div style={{ fontSize: 10, color: T.gold }}>ETH</div>
@@ -2764,7 +2765,7 @@
                       { label: "累计赔付", value: bets.filter(b=>b.status===PolicyStatus.Claimed).reduce((s,b)=>s+Number(b.payoutAmount/KELVIN_PER_ETH),0) + " ETH", color: T.gold },
                     ].map(item => (
                       <div key={item.label} style={{ padding: "14px 16px", borderRadius: 12,
-                        background: "rgba(22,22,28,0.9)", border: "1px solid " + T.b, textAlign: "center" }}>
+                        background: "rgba(17,27,48,0.9)", border: "1px solid " + T.b, textAlign: "center" }}>
                         <div style={{ fontSize: 10, color: T.tx4, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>{item.label}</div>
                         <div style={{ fontFamily: fm, fontSize: 22, fontWeight: 700, color: item.color }}>{item.value}</div>
                       </div>
@@ -2844,7 +2845,7 @@
                         {/* 结算进度日志（结算中） */}
                         {isSettling && settleLog.length > 0 && (
                           <div style={{ marginBottom: 12, padding: "12px 14px", borderRadius: 8,
-                            background: "rgba(212,175,55,0.06)", border: "1px solid " + T.goldBd }}>
+                            background: "rgba(34,211,238,0.06)", border: "1px solid " + T.goldBd }}>
                             {settleLog.map((log, i) => (
                               <div key={i} style={{ fontSize: 12, color: i === settleLog.length-1 ? T.gold : T.tx4,
                                 marginBottom: i < settleLog.length-1 ? 5 : 0, transition: "color 0.3s" }}>
@@ -3083,7 +3084,7 @@
             <h1 style={{ fontSize: 26, fontWeight: 700 }}>{$("my_policies")}</h1>
             <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
               <Button onClick={handleDemo} variant="ghost" size="sm" style={{ 
-                background: "linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(180,140,50,0.1) 100%)",
+                background: "linear-gradient(135deg, rgba(34,211,238,0.15) 0%, rgba(8,145,178,0.1) 100%)",
                 border: "1px solid " + T.goldBd
               }}>
                 🎬 {$("demo_btn")}

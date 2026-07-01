@@ -1,0 +1,24 @@
+# Dependencies
+**/node_modules/
+
+# Build / dist
+**/dist/
+files/chainsure-project/dist/
+
+# Package lock is usually committed for npm, but if you prefer not:
+# files/chainsure-project/package-lock.json
+
+# OS / IDE
+.DS_Store
+**/.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Env secrets
+.env
+.env.local
+.env.*.local
+
+# Misc
+*.tgz
