@@ -2,9 +2,11 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// GitHub Pages 项目站需要 /rialo-/；Vercel / 本地开发用 /
+const base = process.env.VITE_BASE || '/';
+
 export default defineConfig({
-  // GitHub Pages 项目站：https://georgescoote.github.io/rialo-/
-  base: '/rialo-/',
+  base,
   plugins: [react()],
   resolve: {
     alias: {

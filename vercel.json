@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd files/chainsure-project && npm install && npm run build",
+  "outputDirectory": "files/chainsure-project/dist",
+  "installCommand": "cd files/chainsure-project && npm install"
+}
