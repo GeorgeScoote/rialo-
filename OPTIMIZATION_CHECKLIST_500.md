@@ -9,7 +9,7 @@
 ## A. 全局壳层 · App / Nav / Footer（CS-001 ~ CS-040）
 
 - [x] CS-001 [P1] App.tsx 增加 URL hash 路由（#/home）便于分享
-- [ ] CS-002 [P2] App.tsx 页面切换 fadeIn 过渡动画
+- [x] CS-002 [P2] App.tsx 页面切换 fadeIn 过渡动画
 - [ ] CS-003 [P1] App.tsx main 区 min-height 避免页脚跳动
 - [ ] CS-004 [P2] App.tsx 404 未知 page fallback
 - [ ] CS-005 [P1] NavBar Logo 点击回首页并 scroll top

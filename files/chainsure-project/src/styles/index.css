@@ -83,6 +83,16 @@ input[type='date']::-webkit-calendar-picker-indicator {
   }
 }
 
+.page-transition {
+  animation: fadeIn 0.32s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    animation: none;
+  }
+}
+
 @media (max-width: 960px) {
   .nft-grid {
     grid-template-columns: 1fr !important;
