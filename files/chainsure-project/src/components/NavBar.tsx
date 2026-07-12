@@ -12,7 +12,7 @@ export function NavBar() {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
 
-  // 点击菜单外部关闭语言选择
+  // 点击外部或按 Esc 关闭语言选择
   useEffect(() => {
     if (!showLangMenu) return;
     const onPointerDown = (e: MouseEvent) => {
@@ -20,8 +20,17 @@ export function NavBar() {
         setShowLangMenu(false);
       }
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowLangMenu(false);
+      }
+    };
     document.addEventListener('mousedown', onPointerDown);
-    return () => document.removeEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, [showLangMenu]);
 
   void disconnect;
