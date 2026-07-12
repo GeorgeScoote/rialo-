@@ -629,7 +629,6 @@ export function HomePage() {
               </>
             )}
 
-            <div style={{ fontSize: 11, color: T.tx4, textAlign: 'center', padding: '8px 0' }}>ChainSure</div>
           </div>
         </div>
       )}

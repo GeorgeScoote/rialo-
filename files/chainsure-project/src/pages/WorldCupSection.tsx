@@ -380,8 +380,6 @@ export function WorldCupSection() {
             <Button onClick={handleInsure} disabled={busy || !selectedTeam} size="lg" style={{ width: '100%' }}>
               {busy ? $('wc_processing') : !wallet ? $('wc_connect_wallet') : !selectedTeam ? $('wc_select_team_first') : $('wc_insure_now_prefix') + ` ${selPlan.premium} ETH`}
             </Button>
-
-            <div style={{ fontSize: 11, color: T.tx4, textAlign: 'center' }}>{$('worldcup_footer')}</div>
           </div>
         </div>
       )}
