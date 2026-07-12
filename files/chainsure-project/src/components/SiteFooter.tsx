@@ -134,15 +134,9 @@ export function SiteFooter() {
           style={{
             paddingTop: 20,
             borderTop: '1px solid rgba(255,255,255,0.05)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 16,
-            flexWrap: 'wrap',
           }}
         >
           <span style={{ fontSize: 12, color: T.tx4 }}>{$('footer_copyright', { year })}</span>
-          <span style={{ fontSize: 11, color: T.tx4 }}>{$('footer_demo')}</span>
         </div>
       </div>
     </footer>
