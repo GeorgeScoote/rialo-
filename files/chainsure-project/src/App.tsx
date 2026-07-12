@@ -23,7 +23,7 @@ export function App() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: T.bg, color: T.tx, fontFamily: FONT_SANS }}>
       <NavBar />
-      <main style={{ flex: 1 }}>
+      <main className="app-main">
         <div key={page} className="page-transition">
           <PageView />
         </div>
