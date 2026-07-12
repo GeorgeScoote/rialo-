@@ -29,7 +29,6 @@ export const PRODUCTS: Product[] = [
   { id: 'flight', nameKey: 'product_flight', icon: '✈️', active: true, color: '#3b82f6' },
   { id: 'worldcup', nameKey: 'product_worldcup', icon: '⚽', active: true, color: '#f59e0b' },
   { id: 'health', nameKey: 'product_health', icon: '🏥', active: false, color: '#ef4444', updating: true },
-  { id: 'life', nameKey: 'product_life', icon: '❤️', active: false, color: '#ec4899', updating: true },
 ];
 
 export interface Tier {

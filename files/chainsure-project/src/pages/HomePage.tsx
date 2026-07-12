@@ -10,7 +10,7 @@ import {
   TIERS,
 } from '@/lib/constants';
 import { n } from '@/lib/format';
-import { Badge, Button, Card } from '@components/ui';
+import { Badge, Button, Card, SearchInput, SegmentedControl } from '@components/ui';
 import { NFTMintSection } from '@pages/NFTMintSection';
 import { WorldCupSection } from '@pages/WorldCupSection';
 import { FONT_MONO, FONT_SANS, T } from '@/theme/tokens';
@@ -56,6 +56,14 @@ export function HomePage() {
   const payout = tier.payout;
 
   const today = new Date().toISOString().split('T')[0];
+  const datePresets = (['tomorrow', 'day_after', 'plus_7_days'] as const).map((k, i) => {
+    const off = [1, 2, 7][i];
+    const d = new Date();
+    d.setDate(d.getDate() + off);
+    return { key: k, value: d.toISOString().split('T')[0] };
+  });
+  const activeDatePreset = datePresets.find((p) => p.value === date)?.key ?? null;
+
   const tomorrow = (() => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
@@ -346,54 +354,33 @@ export function HomePage() {
           {/* 左：选择 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <Card>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: T.tx2, letterSpacing: '-0.01em' }}>{$('select_flight')}</span>
-                <div style={{ display: 'flex', gap: 4, background: 'rgba(0,0,0,0.3)', borderRadius: 8, padding: 3 }}>
-                  {(['all', 'dom', 'intl'] as const).map((k) => (
-                    <button
-                      key={k}
-                      onClick={() => setTab(k)}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: 6,
-                        border: 'none',
-                        background: tab === k ? T.goldBg : 'transparent',
-                        color: tab === k ? T.gold : T.tx4,
-                        fontSize: 12,
-                        fontWeight: tab === k ? 600 : 500,
-                        cursor: 'pointer',
-                        fontFamily: FONT_SANS,
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      {$(k === 'all' ? 'filter_all' : k === 'dom' ? 'filter_domestic' : 'filter_international')}
-                    </button>
-                  ))}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, marginBottom: 12 }}>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: T.tx, letterSpacing: '-0.01em' }}>{$('select_flight')}</span>
+                  <span style={{ fontSize: 12, color: T.tx3, fontFamily: FONT_MONO }}>{$('flight_list_count', { count: list.length })}</span>
                 </div>
-              </div>
-
-              {/* 搜索框 */}
-              <div style={{ marginBottom: 12 }}>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={$('search_placeholder')}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 10,
-                    border: '1px solid ' + T.b2,
-                    background: 'rgba(0,0,0,0.3)',
-                    color: T.tx,
-                    fontSize: 13,
-                    fontFamily: FONT_SANS,
-                    outline: 'none',
-                  }}
+                <SegmentedControl
+                  stretch
+                  value={tab}
+                  onChange={setTab}
+                  options={[
+                    { value: 'all', label: $('filter_all') },
+                    { value: 'dom', label: $('filter_domestic') },
+                    { value: 'intl', label: $('filter_international') },
+                  ]}
                 />
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 340, overflowY: 'auto', paddingRight: 4 }}>
+              <div style={{ marginBottom: 14 }}>
+                <SearchInput
+                  value={search}
+                  onChange={setSearch}
+                  placeholder={$('search_placeholder')}
+                  onClear={() => setSearch('')}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 360, overflowY: 'auto', paddingRight: 4 }}>
                 {list.map((f) => {
                   const idx = FLIGHTS.indexOf(f);
                   const sel = fi === idx;
@@ -401,49 +388,53 @@ export function HomePage() {
                   return (
                     <div
                       key={f.id}
+                      className={'flight-item' + (sel ? ' flight-item--selected' : '')}
                       onClick={() => setFi(idx)}
                       style={{
-                        padding: '16px 18px',
+                        padding: '14px 16px',
                         borderRadius: 12,
                         cursor: 'pointer',
-                        border: '1px solid ' + (sel ? T.goldBd : 'rgba(255,255,255,0.04)'),
+                        border: '1px solid ' + (sel ? T.goldBd : 'rgba(255,255,255,0.06)'),
                         background: sel ? 'linear-gradient(135deg, rgba(34,211,238,0.08) 0%, rgba(17,27,48,0.9) 100%)' : 'rgba(255,255,255,0.02)',
-                        transition: 'all 0.2s ease',
                         boxShadow: sel ? '0 2px 12px rgba(34,211,238,0.1)' : 'none',
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <span style={{ fontFamily: FONT_MONO, fontSize: 15, fontWeight: 700, color: sel ? T.gold : T.tx2, letterSpacing: '-0.01em' }}>{f.iata}</span>
-                          <span style={{ fontSize: 12, color: T.tx4 }}>{f.airline.name}</span>
-                          {f.intl && <Badge variant="info">{$('intl_badge')}</Badge>}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <span style={{ fontFamily: FONT_MONO, fontSize: 15, fontWeight: 700, color: sel ? T.gold : T.tx, letterSpacing: '-0.01em' }}>{f.iata}</span>
+                            <span style={{ fontSize: 12, color: T.tx3 }}>{f.airline.name}</span>
+                            {f.intl && <Badge variant="info">{$('intl_badge')}</Badge>}
+                          </div>
+                          <div style={{ fontSize: 12, color: T.tx4, marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ fontFamily: FONT_MONO, color: sel ? T.tx2 : T.tx3 }}>{f.dep.iata}</span>
+                            <span style={{ color: T.gold, fontSize: 10, opacity: 0.85 }}>━━✈</span>
+                            <span style={{ fontFamily: FONT_MONO, color: sel ? T.tx2 : T.tx3 }}>{f.arr.iata}</span>
+                            <span style={{ marginLeft: 'auto', fontFamily: FONT_MONO, color: T.tx3 }}>{f.dep.scheduled}</span>
+                          </div>
                         </div>
-                        <Badge variant={delayed ? 'warning' : 'success'}>{delayed ? $('delay_badge', { min: f.dep_delayed }) : $('ontime_badge')}</Badge>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setDetail(f); }}
-                          style={{
-                            marginLeft: 8,
-                            padding: '2px 8px',
-                            fontSize: 11,
-                            borderRadius: 6,
-                            border: '1px solid ' + T.b2,
-                            background: 'transparent',
-                            color: T.tx3,
-                            cursor: 'pointer',
-                            fontFamily: FONT_SANS,
-                          }}
-                        >
-                          ℹ️
-                        </button>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+                          <Badge variant={delayed ? 'warning' : 'success'}>{delayed ? $('delay_badge', { min: f.dep_delayed }) : $('ontime_badge')}</Badge>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setDetail(f); }}
+                            style={{
+                              padding: '4px 10px',
+                              fontSize: 11,
+                              borderRadius: 6,
+                              border: '1px solid ' + T.b2,
+                              background: 'rgba(255,255,255,0.03)',
+                              color: T.tx3,
+                              cursor: 'pointer',
+                              fontFamily: FONT_SANS,
+                              transition: 'color 0.15s ease, border-color 0.15s ease',
+                            }}
+                          >
+                            {$('flight_view_detail')}
+                          </button>
+                        </div>
                       </div>
-                      <div style={{ fontSize: 12, color: T.tx4, marginTop: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontFamily: FONT_MONO, color: sel ? T.tx2 : T.tx4 }}>{f.dep.iata}</span>
-                        <span style={{ color: T.gold, fontSize: 10 }}>━━✈</span>
-                        <span style={{ fontFamily: FONT_MONO, color: sel ? T.tx2 : T.tx4 }}>{f.arr.iata}</span>
-                        <span style={{ marginLeft: 'auto', fontFamily: FONT_MONO }}>{f.dep.scheduled}</span>
-                      </div>
-                      {/* 增强信息：准点率 + 时长 + 距离 */}
-                      <div style={{ fontSize: 11, color: T.tx4, marginTop: 8, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                      <div style={{ fontSize: 11, color: T.tx4, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
                         <span>{$('ontime_rate')}: <strong style={{ color: sel ? T.gold : T.tx2 }}>{Math.round(f.onTimeRate * 100)}%</strong></span>
                         <span>{$('duration')}: {Math.floor(f.duration / 60)}h {f.duration % 60}m</span>
                         {f.distanceKm && <span>{$('distance')}: {(f.distanceKm / 1000).toFixed(0)}k km</span>}
@@ -452,7 +443,8 @@ export function HomePage() {
                   );
                 })}
                 {list.length === 0 && (
-                  <div style={{ padding: '18px 12px', textAlign: 'center', color: T.tx4, fontSize: 13 }}>
+                  <div style={{ padding: '28px 16px', textAlign: 'center', color: T.tx3, fontSize: 13, borderRadius: 12, border: '1px dashed ' + T.b2, background: 'rgba(0,0,0,0.2)' }}>
+                    <div style={{ fontSize: 28, marginBottom: 10, opacity: 0.5 }}>✈️</div>
                     { $('no_flight_result') }
                   </div>
                 )}
@@ -460,15 +452,15 @@ export function HomePage() {
             </Card>
 
             <Card>
-              <span style={{ fontSize: 14, fontWeight: 600, color: T.tx2, display: 'block', marginBottom: 14, letterSpacing: '-0.01em' }}>{$('select_date')}</span>
-              <div style={{ display: 'flex', gap: 12 }}>
+              <span style={{ fontSize: 15, fontWeight: 600, color: T.tx, display: 'block', marginBottom: 14, letterSpacing: '-0.01em' }}>{$('select_date')}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   min={tomorrow}
                   style={{
-                    flex: 1,
+                    width: '100%',
                     padding: '14px 16px',
                     borderRadius: 10,
                     border: '1px solid ' + T.b2,
@@ -480,37 +472,18 @@ export function HomePage() {
                     transition: 'all 0.2s ease',
                   }}
                 />
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {(['tomorrow', 'day_after', 'plus_7_days'] as const).map((lbKey, i) => {
-                    const off = [1, 2, 7][i];
-                    const d = new Date();
-                    d.setDate(d.getDate() + off);
-                    const v = d.toISOString().split('T')[0];
-                    const s = date === v;
-                    return (
-                      <button
-                        key={lbKey}
-                        onClick={() => setDate(v)}
-                        style={{
-                          padding: '10px 14px',
-                          borderRadius: 8,
-                          border: '1px solid ' + (s ? T.goldBd : T.b),
-                          background: s ? T.goldBg : 'transparent',
-                          color: s ? T.gold : T.tx4,
-                          fontSize: 12,
-                          fontWeight: s ? 600 : 500,
-                          cursor: 'pointer',
-                          fontFamily: FONT_SANS,
-                          transition: 'all 0.2s ease',
-                        }}
-                      >
-                        {$(lbKey)}
-                      </button>
-                    );
-                  })}
-                </div>
+                <SegmentedControl
+                  stretch
+                  size="sm"
+                  value={activeDatePreset}
+                  onChange={(k) => {
+                    const preset = datePresets.find((p) => p.key === k);
+                    if (preset) setDate(preset.value);
+                  }}
+                  options={datePresets.map((p) => ({ value: p.key, label: $(p.key) }))}
+                />
               </div>
-              <div style={{ marginTop: 10, fontSize: 13, color: canPurchase ? T.tx3 : T.error }}>
+              <div style={{ marginTop: 12, fontSize: 13, color: canPurchase ? T.tx3 : T.error }}>
                 {formatDate(date)} · {fl.dep.scheduled}
                 {!canPurchase && <span style={{ marginLeft: 8 }}>⚠️ {$('select_future_date')}</span>}
               </div>

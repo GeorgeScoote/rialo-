@@ -168,6 +168,152 @@ export function Button({
   );
 }
 
+/** 分段切换（全部 / 国内 / 国际等） */
+export function SegmentedControl<T extends string>({
+  options,
+  value,
+  onChange,
+  stretch = false,
+  size = 'md',
+}: {
+  options: { value: T; label: ReactNode }[];
+  value: T | null;
+  onChange: (v: T) => void;
+  stretch?: boolean;
+  size?: 'sm' | 'md';
+}) {
+  const sz = size === 'sm'
+    ? { pad: '6px 12px', fs: 12, minW: 48, outer: 8, inner: 6 }
+    : { pad: '8px 16px', fs: 13, minW: 56, outer: 10, inner: 7 };
+
+  return (
+    <div
+      role="tablist"
+      className="seg-control"
+      style={{
+        display: stretch ? 'flex' : 'inline-flex',
+        width: stretch ? '100%' : undefined,
+        gap: 2,
+        padding: 4,
+        borderRadius: sz.outer,
+        background: 'rgba(0,0,0,0.35)',
+        border: '1px solid ' + T.b2,
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
+    >
+      {options.map((opt) => {
+        const active = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            className={'seg-btn' + (active ? ' seg-btn--active' : '')}
+            onClick={() => onChange(opt.value)}
+            style={{
+              flex: stretch ? 1 : undefined,
+              padding: sz.pad,
+              borderRadius: sz.inner,
+              border: 'none',
+              minWidth: stretch ? 0 : sz.minW,
+              background: active
+                ? 'linear-gradient(135deg, rgba(34,211,238,0.24) 0%, rgba(8,145,178,0.14) 100%)'
+                : 'transparent',
+              color: active ? T.gold : T.tx2,
+              fontSize: sz.fs,
+              fontWeight: active ? 600 : 500,
+              cursor: 'pointer',
+              fontFamily: FONT_SANS,
+              transition: 'color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease',
+              boxShadow: active ? 'inset 0 0 0 1px ' + T.goldBd + ', 0 1px 8px rgba(34,211,238,0.12)' : 'none',
+              whiteSpace: 'nowrap',
+              lineHeight: 1.2,
+              textAlign: 'center',
+            }}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** 带搜索图标的输入框 */
+export function SearchInput({
+  value,
+  onChange,
+  placeholder,
+  onClear,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  onClear?: () => void;
+}) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '0 14px',
+        borderRadius: 10,
+        border: '1px solid ' + (focused ? T.goldBd : T.b2),
+        background: focused ? 'rgba(34,211,238,0.04)' : 'rgba(0,0,0,0.3)',
+        boxShadow: focused ? '0 0 0 3px rgba(34,211,238,0.08)' : 'none',
+        transition: 'border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease',
+      }}
+    >
+      <span style={{ fontSize: 14, color: focused ? T.gold : T.tx4, flexShrink: 0, lineHeight: 1 }} aria-hidden>
+        ⌕
+      </span>
+      <input
+        type="search"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder={placeholder}
+        style={{
+          flex: 1,
+          minWidth: 0,
+          padding: '11px 0',
+          border: 'none',
+          background: 'transparent',
+          color: T.tx,
+          fontSize: 13,
+          fontFamily: FONT_SANS,
+          outline: 'none',
+        }}
+      />
+      {value && onClear && (
+        <button
+          type="button"
+          onClick={onClear}
+          aria-label="clear"
+          style={{
+            border: 'none',
+            background: T.raised,
+            color: T.tx3,
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            cursor: 'pointer',
+            fontSize: 14,
+            lineHeight: 1,
+            flexShrink: 0,
+          }}
+        >
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function Empty({
   icon,
   title,

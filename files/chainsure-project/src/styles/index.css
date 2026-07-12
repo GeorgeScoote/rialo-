@@ -43,6 +43,22 @@ body {
   background: rgba(34, 211, 238, 0.6);
 }
 
+.seg-btn:not(.seg-btn--active):hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #eaf2ff !important;
+}
+
+.flight-item {
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.flight-item:hover {
+  border-color: rgba(34, 211, 238, 0.22) !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+.flight-item--selected:hover {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(17, 27, 48, 0.92) 100%) !important;
+}
+
 input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(1) sepia(1) saturate(8) hue-rotate(140deg);
 }

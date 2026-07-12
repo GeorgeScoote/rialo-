@@ -146,6 +146,8 @@ export const translations = {
     duration: '飞行时长',
     distance: '距离',
     no_flight_result: '未找到匹配的航班',
+    flight_list_count: '{count} 条航线',
+    flight_view_detail: '详情',
 
     flight_details: '航线详情',
     flight_details_sub: '航班与保障信息',
@@ -459,6 +461,8 @@ export const translations = {
     duration: 'Duration',
     distance: 'Distance',
     no_flight_result: 'No matching flights found',
+    flight_list_count: '{count} routes',
+    flight_view_detail: 'Details',
 
     flight_details: 'Flight Details',
     flight_details_sub: 'Route & Coverage Info',
@@ -791,6 +795,8 @@ export const translations = {
     duration: '飛行時間',
     distance: '距離',
     no_flight_result: '該当するフライトが見つかりません',
+    flight_list_count: '{count} 路線',
+    flight_view_detail: '詳細',
 
     flight_details: 'フライト詳細',
     flight_details_sub: '路線・補償情報',
@@ -1103,6 +1109,8 @@ export const translations = {
     duration: '비행시간',
     distance: '거리',
     no_flight_result: '일치하는 항공편을 찾을 수 없습니다',
+    flight_list_count: '{count}개 노선',
+    flight_view_detail: '상세',
 
     flight_details: '항공편 상세',
     flight_details_sub: '노선 및 보장 정보',
