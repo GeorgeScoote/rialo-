@@ -13,7 +13,7 @@
 - [x] CS-003 [P1] App.tsx main 区 min-height 避免页脚跳动
 - [x] CS-004 [P2] App.tsx 404 未知 page fallback
 - [x] CS-005 [P1] NavBar Logo 点击回首页并 scroll top
-- [ ] CS-006 [P1] NavBar 当前页 nav 项 aria-current
+- [x] CS-006 [P1] NavBar 当前页 nav 项 aria-current
 - [ ] CS-007 [P1] NavBar 语言菜单点击外部关闭
 - [ ] CS-008 [P1] NavBar 语言菜单 Esc 关闭
 - [ ] CS-009 [P2] NavBar 移动端汉堡菜单

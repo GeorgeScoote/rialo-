@@ -87,19 +87,23 @@ export function NavBar() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 4, marginLeft: 16 }}>
-            {navItems.map((item) => (
+          <div role="navigation" aria-label={$('footer_nav')} style={{ display: 'flex', gap: 4, marginLeft: 16 }}>
+            {navItems.map((item) => {
+              const active = page === item.id;
+              return (
               <button
                 key={item.id}
+                type="button"
+                aria-current={active ? 'page' : undefined}
                 onClick={() => setPage(item.id)}
                 style={{
                   padding: '10px 18px',
                   borderRadius: 10,
-                  border: page === item.id ? '1px solid ' + T.goldBd : '1px solid transparent',
-                  background: page === item.id ? T.goldBg : 'transparent',
-                  color: page === item.id ? T.gold : T.tx3,
+                  border: active ? '1px solid ' + T.goldBd : '1px solid transparent',
+                  background: active ? T.goldBg : 'transparent',
+                  color: active ? T.gold : T.tx3,
                   fontSize: 13,
-                  fontWeight: page === item.id ? 600 : 500,
+                  fontWeight: active ? 600 : 500,
                   cursor: 'pointer',
                   fontFamily: FONT_SANS,
                   display: 'flex',
@@ -109,10 +113,11 @@ export function NavBar() {
                   letterSpacing: '0.01em',
                 }}
               >
-                <span style={{ opacity: page === item.id ? 1 : 0.5 }}>{item.icon}</span>
+                <span style={{ opacity: active ? 1 : 0.5 }}>{item.icon}</span>
                 {$(item.labelKey)}
               </button>
-            ))}
+            );
+            })}
           </div>
         </div>
 
