@@ -11,7 +11,7 @@
 - [x] CS-001 [P1] App.tsx 增加 URL hash 路由（#/home）便于分享
 - [x] CS-002 [P2] App.tsx 页面切换 fadeIn 过渡动画
 - [x] CS-003 [P1] App.tsx main 区 min-height 避免页脚跳动
-- [ ] CS-004 [P2] App.tsx 404 未知 page fallback
+- [x] CS-004 [P2] App.tsx 404 未知 page fallback
 - [ ] CS-005 [P1] NavBar Logo 点击回首页并 scroll top
 - [ ] CS-006 [P1] NavBar 当前页 nav 项 aria-current
 - [ ] CS-007 [P1] NavBar 语言菜单点击外部关闭

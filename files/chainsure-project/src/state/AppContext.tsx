@@ -9,7 +9,7 @@ import {
   type Flight,
 } from '@/lib/constants';
 import { n, shortAddr, sleep } from '@/lib/format';
-import { isAppPage, parseHashPage, syncHashPage, type AppPage } from '@/lib/routes';
+import { isAppPage, parseHashRoute, syncHashPage, type AppPage, type AppRoute } from '@/lib/routes';
 import { getClaimAddress, getPolicyAddress, rialoSDK } from '@sdk/rialo';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -31,7 +31,7 @@ interface AppContextValue {
   policies: any[];
   claims: any[];
   txHistory: Tx[];
-  page: AppPage;
+  page: AppRoute;
   loading: boolean;
   setPage: (p: AppPage | string) => void;
   connect: () => Promise<void>;
@@ -59,7 +59,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [policies, setPolicies] = useState<any[]>([]);
   const [claims, setClaims] = useState<any[]>([]);
   const [txHistory, setTxHistory] = useState<Tx[]>([]);
-  const [page, setPageState] = useState<AppPage>(() => parseHashPage());
+  const [page, setPageState] = useState<AppRoute>(() => parseHashRoute());
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -67,17 +67,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => rialoSDK.destroy();
   }, []);
 
-  // hash 路由：支持 #/home 分享链接，浏览器前进/后退
+  // hash 路由：合法页面同步 hash；未知路径展示 404
   useEffect(() => {
-    const current = parseHashPage();
-    setPageState(current);
-    const expected = `#/${current}`;
-    if (window.location.hash !== expected) {
-      syncHashPage(current, true);
+    const route = parseHashRoute();
+    setPageState(route);
+
+    const hash = window.location.hash;
+    if (!hash || hash === '#' || hash === '#/') {
+      syncHashPage('home', true);
     }
 
     const onHashChange = () => {
-      setPageState(parseHashPage());
+      setPageState(parseHashRoute());
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
