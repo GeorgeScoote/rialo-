@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import {
   DELAY_THRESHOLD,
+  ethToKelvin,
   FLIGHTS,
   KELVIN_PER_ETH,
   MAX_POLICIES_PER_DAY,
@@ -251,8 +252,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       scheduledDeparture: demoFlight.dep.scheduled,
       depAirport: demoFlight.dep.iata,
       arrAirport: demoFlight.arr.iata,
-      payoutAmount: BigInt(500) * KELVIN_PER_ETH,
-      premiumPaid: BigInt(100) * KELVIN_PER_ETH,
+      payoutAmount: ethToKelvin(5),
+      premiumPaid: ethToKelvin(1),
       status: PolicyStatus.Active,
       createdAt: Date.now() - 86400000,
       settledAt: null,
@@ -261,7 +262,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
 
     setPolicies((prev) => [demoPolicy, ...prev]);
-    addTx({ type: 'demo_purchase', time: Date.now() - 86400000, amount: -100, flightIata: demoFlight.iata, signature: demoPolicy.txSignature });
+    addTx({ type: 'demo_purchase', time: Date.now() - 86400000, amount: -1, flightIata: demoFlight.iata, signature: demoPolicy.txSignature });
     return demoPolicy;
   }, [wallet, addTx]);
 

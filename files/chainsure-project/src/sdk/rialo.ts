@@ -4,7 +4,7 @@
  * 演示模式：模拟钱包连接、购买保单、结算等链上行为。
  * 生产环境可替换为 @rialo/ts-cdk + @rialo/frost-core 真实调用（见注释）。
  */
-import { KELVIN_PER_ETH, PROGRAM_ID } from '@/lib/constants';
+import { KELVIN_PER_ETH, ethToKelvin, PROGRAM_ID } from '@/lib/constants';
 import { randomSig, sleep } from '@/lib/format';
 
 /** PDA Seeds */
@@ -138,8 +138,8 @@ export class RialoSDK {
     payout: bigint;
   }> {
     const { owner, flightIata, flightIcao, date, scheduledDeparture, depAirport, arrAirport, payoutAmount, premiumAmount } = params;
-    const premiumKelvin = BigInt(premiumAmount) * KELVIN_PER_ETH;
-    const payoutKelvin = BigInt(payoutAmount) * KELVIN_PER_ETH;
+    const premiumKelvin = ethToKelvin(premiumAmount);
+    const payoutKelvin = ethToKelvin(payoutAmount);
     const [policyAddress, policyBump] = getPolicyAddress(owner, flightIata, date);
     void getConfigAddress();
     void getTreasuryAddress();

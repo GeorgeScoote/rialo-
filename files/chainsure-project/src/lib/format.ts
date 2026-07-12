@@ -2,9 +2,20 @@
 
 export const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
-/** 数字格式化：bigint 按 ETH 单位换算，普通数字带千分位 */
-export const n = (v: number | bigint): string =>
-  typeof v === 'bigint' ? Number(v).toLocaleString() : v.toLocaleString();
+import { KELVIN_PER_ETH } from '@/lib/constants';
+
+/** 数字格式化：支持小数 ETH 显示 */
+export const n = (v: number | bigint): string => {
+  const num =
+    typeof v === 'bigint'
+      ? Number(v) / Number(KELVIN_PER_ETH)
+      : v;
+  if (!Number.isFinite(num)) return '0';
+  const abs = Math.abs(num);
+  if (abs >= 1000) return num.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  if (Number.isInteger(num)) return num.toLocaleString();
+  return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+};
 
 /** 缩写钱包地址 */
 export const shortAddr = (addr?: string | null): string =>

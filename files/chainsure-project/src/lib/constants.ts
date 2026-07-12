@@ -4,6 +4,10 @@
 
 export const PROGRAM_ID = 'ChainSure1111111111111111111111111111111111';
 export const KELVIN_PER_ETH = 1_000_000_000n;
+
+/** ETH 数量 → Kelvin（链上最小单位） */
+export const ethToKelvin = (eth: number): bigint =>
+  BigInt(Math.round(eth * Number(KELVIN_PER_ETH)));
 export const DELAY_THRESHOLD = 120; // 分钟
 export const MAX_POLICIES_PER_DAY = 5; // 每人每天最多 5 份
 
@@ -38,12 +42,12 @@ export interface Tier {
   rate: number;
 }
 
-/** 保障方案 */
+/** 保障方案（ETH 数量已按 demo 缩小 100 倍） */
 export const TIERS: Tier[] = [
-  { premium: 50, payout: 200, nameKey: 'plan_basic', rate: 25 },
-  { premium: 100, payout: 500, nameKey: 'plan_standard', rate: 20 },
-  { premium: 200, payout: 1000, nameKey: 'plan_premium', rate: 20 },
-  { premium: 500, payout: 2000, nameKey: 'plan_vip', rate: 25 },
+  { premium: 0.5, payout: 2, nameKey: 'plan_basic', rate: 25 },
+  { premium: 1, payout: 5, nameKey: 'plan_standard', rate: 20 },
+  { premium: 2, payout: 10, nameKey: 'plan_premium', rate: 20 },
+  { premium: 5, payout: 20, nameKey: 'plan_vip', rate: 25 },
 ];
 
 export interface Flight {

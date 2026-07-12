@@ -514,14 +514,14 @@ export function HomePage() {
                         <div style={{ fontSize: 12, color: T.tx4, marginBottom: 4 }}>{$(t.nameKey)}</div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                           <span style={{ fontSize: 11, color: T.tx4 }}>{$('premium_label')}</span>
-                          <span style={{ fontFamily: FONT_MONO, fontSize: 18, fontWeight: 700, color: sel ? T.w : T.tx2 }}>{n(t.premium)}</span>
+                          <span style={{ fontFamily: FONT_MONO, fontSize: 15, fontWeight: 700, color: sel ? T.w : T.tx2 }}>{n(t.premium)}</span>
                           <span style={{ fontSize: 11, color: T.tx4 }}>ETH</span>
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontSize: 11, color: T.gold, marginBottom: 4 }}>{$('payout_label', { threshold: DELAY_THRESHOLD })}</div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, justifyContent: 'flex-end' }}>
-                          <span style={{ fontFamily: FONT_MONO, fontSize: 20, fontWeight: 700, color: sel ? T.gold : T.tx3 }}>+{n(t.payout)}</span>
+                          <span style={{ fontFamily: FONT_MONO, fontSize: 16, fontWeight: 700, color: sel ? T.gold : T.tx3 }}>+{n(t.payout)}</span>
                           <span style={{ fontSize: 11, color: T.tx4 }}>ETH</span>
                         </div>
                       </div>
@@ -572,12 +572,12 @@ export function HomePage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                 <div style={{ padding: '16px', background: T.bg, borderRadius: 10, textAlign: 'center' }}>
                   <div style={{ fontSize: 11, color: T.tx4, marginBottom: 6 }}>{$('you_pay')}</div>
-                  <div style={{ fontFamily: FONT_MONO, fontSize: 28, fontWeight: 700, color: T.tx }}>{n(premium)}</div>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 22, fontWeight: 700, color: T.tx }}>{n(premium)}</div>
                   <div style={{ fontSize: 11, color: T.tx4 }}>ETH</div>
                 </div>
                 <div style={{ padding: '16px', background: T.goldBg, border: '1px solid ' + T.goldBd, borderRadius: 10, textAlign: 'center' }}>
                   <div style={{ fontSize: 11, color: T.gold, marginBottom: 6 }}>{$('you_get')}</div>
-                  <div style={{ fontFamily: FONT_MONO, fontSize: 28, fontWeight: 700, color: T.gold }}>+{n(payout)}</div>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 22, fontWeight: 700, color: T.gold }}>+{n(payout)}</div>
                   <div style={{ fontSize: 11, color: T.gold }}>ETH</div>
                 </div>
               </div>
