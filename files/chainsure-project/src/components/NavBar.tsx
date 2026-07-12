@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useApp } from '@/state/AppContext';
 import { useLang } from '@i18n/LangContext';
 import { LANGS } from '@i18n/index';
@@ -10,6 +10,19 @@ export function NavBar() {
   const { wallet, balance, page, setPage, connect, disconnect, loading } = useApp();
   const { lang, setLang, $ } = useLang();
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  // 点击菜单外部关闭语言选择
+  useEffect(() => {
+    if (!showLangMenu) return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setShowLangMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [showLangMenu]);
 
   void disconnect;
 
@@ -123,8 +136,11 @@ export function NavBar() {
 
         {/* Right: Language + Wallet */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ position: 'relative' }}>
+          <div ref={langMenuRef} style={{ position: 'relative' }}>
             <button
+              type="button"
+              aria-expanded={showLangMenu}
+              aria-haspopup="listbox"
               onClick={() => setShowLangMenu(!showLangMenu)}
               style={{
                 height: 36,
