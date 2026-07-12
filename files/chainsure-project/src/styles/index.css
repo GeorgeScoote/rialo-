@@ -125,6 +125,24 @@ input[type='date']::-webkit-calendar-picker-indicator {
   .navbar-brand-sub {
     display: none;
   }
+
+  /* NavBar 移动端隐藏次要按钮（CS-010） */
+  .navbar-secondary {
+    display: none !important;
+  }
+
+  .navbar-wallet-btn {
+    padding: 0 12px !important;
+    min-width: 40px;
+  }
+
+  .navbar-wallet-btn.is-connected .navbar-wallet-label {
+    display: none;
+  }
+
+  .navbar-actions {
+    gap: 8px !important;
+  }
 }
 
 /* NavBar 桌面导航 / 移动端切换 */
@@ -162,4 +180,34 @@ input[type='date']::-webkit-calendar-picker-indicator {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.navbar-mobile-panel-lang {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.navbar-mobile-panel-lang-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.navbar-mobile-panel-lang-btn.is-active {
+  border-color: rgba(234, 179, 8, 0.35);
+  background: rgba(234, 179, 8, 0.08);
+  color: #fbbf24;
+  font-weight: 600;
 }

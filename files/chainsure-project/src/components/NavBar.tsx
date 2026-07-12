@@ -181,8 +181,8 @@ export function NavBar() {
         </div>
 
         {/* 右侧：语言 + 钱包 + 汉堡 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-          <div ref={langMenuRef} style={{ position: 'relative' }}>
+        <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          <div ref={langMenuRef} className="navbar-secondary" style={{ position: 'relative' }}>
             <button
               type="button"
               aria-expanded={showLangMenu}
@@ -257,6 +257,7 @@ export function NavBar() {
 
           {wallet && (
             <div
+              className="navbar-secondary"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -275,8 +276,10 @@ export function NavBar() {
           )}
 
           <button
+            className={'navbar-wallet-btn' + (wallet ? ' is-connected' : '')}
             onClick={wallet ? () => goToPage('wallet') : connect}
             disabled={loading}
+            aria-label={loading ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
             style={{
               height: 40,
               padding: '0 20px',
@@ -303,7 +306,9 @@ export function NavBar() {
                 boxShadow: wallet ? '0 0 8px ' + T.success : 'none',
               }}
             />
-            {loading ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
+            <span className="navbar-wallet-label">
+              {loading ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
+            </span>
           </button>
 
           <button
@@ -331,6 +336,20 @@ export function NavBar() {
           className="navbar-mobile-panel"
         >
           {navItems.map((item) => renderNavButton(item, true))}
+          <div className="navbar-mobile-panel-lang">
+            {Object.values(LANGS).map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                className={'navbar-mobile-panel-lang-btn' + (lang === l.code ? ' is-active' : '')}
+                aria-pressed={lang === l.code}
+                onClick={() => setLang(l.code)}
+              >
+                <span>{l.flag}</span>
+                <span>{l.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </nav>
