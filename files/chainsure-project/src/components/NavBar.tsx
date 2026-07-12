@@ -20,6 +20,11 @@ export function NavBar() {
     { id: 'wallet', labelKey: 'nav_wallet', icon: '○' },
   ];
 
+  const goHome = () => {
+    setPage('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <nav
       style={{
@@ -45,7 +50,19 @@ export function NavBar() {
       >
         {/* Logo + Nav */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => setPage('home')}>
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="ChainSure Home"
+            style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+            onClick={goHome}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                goHome();
+              }
+            }}
+          >
             <div
               style={{
                 width: 36,
