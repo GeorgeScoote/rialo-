@@ -6,23 +6,37 @@ import { shortAddr } from '@/lib/format';
 import { Anim } from '@components/ui';
 import { FONT_MONO, FONT_SANS, T } from '@/theme/tokens';
 
+const MOBILE_NAV_MQ = '(max-width: 960px)';
+
 export function NavBar() {
   const { wallet, balance, page, setPage, connect, disconnect, loading } = useApp();
   const { lang, setLang, $ } = useLang();
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
 
-  // 点击外部或按 Esc 关闭语言选择
+  // 点击外部或按 Esc 关闭语言选择 / 移动端菜单
   useEffect(() => {
-    if (!showLangMenu) return;
+    if (!showLangMenu && !mobileMenuOpen) return;
     const onPointerDown = (e: MouseEvent) => {
-      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (showLangMenu && langMenuRef.current && !langMenuRef.current.contains(target)) {
         setShowLangMenu(false);
+      }
+      if (
+        mobileMenuOpen &&
+        !mobileToggleRef.current?.contains(target) &&
+        !mobilePanelRef.current?.contains(target)
+      ) {
+        setMobileMenuOpen(false);
       }
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setShowLangMenu(false);
+        setMobileMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', onPointerDown);
@@ -31,7 +45,17 @@ export function NavBar() {
       document.removeEventListener('mousedown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [showLangMenu]);
+  }, [showLangMenu, mobileMenuOpen]);
+
+  // 切回桌面宽度时收起移动端菜单
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_NAV_MQ);
+    const onChange = () => {
+      if (!mq.matches) setMobileMenuOpen(false);
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   void disconnect;
 
@@ -44,7 +68,46 @@ export function NavBar() {
 
   const goHome = () => {
     setPage('home');
+    setMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const goToPage = (id: string) => {
+    setPage(id);
+    setMobileMenuOpen(false);
+  };
+
+  const renderNavButton = (item: (typeof navItems)[number], compact = false) => {
+    const active = page === item.id;
+    return (
+      <button
+        key={item.id}
+        type="button"
+        aria-current={active ? 'page' : undefined}
+        onClick={() => goToPage(item.id)}
+        style={{
+          width: compact ? '100%' : undefined,
+          padding: compact ? '14px 16px' : '10px 18px',
+          borderRadius: 10,
+          border: active ? '1px solid ' + T.goldBd : '1px solid transparent',
+          background: active ? T.goldBg : 'transparent',
+          color: active ? T.gold : T.tx3,
+          fontSize: compact ? 14 : 13,
+          fontWeight: active ? 600 : 500,
+          cursor: 'pointer',
+          fontFamily: FONT_SANS,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          transition: 'all 0.2s ease',
+          letterSpacing: '0.01em',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{ opacity: active ? 1 : 0.5 }}>{item.icon}</span>
+        {$(item.labelKey)}
+      </button>
+    );
   };
 
   return (
@@ -60,6 +123,7 @@ export function NavBar() {
       }}
     >
       <div
+        className="navbar-inner"
         style={{
           maxWidth: 1140,
           margin: '0 auto',
@@ -70,13 +134,13 @@ export function NavBar() {
           justifyContent: 'space-between',
         }}
       >
-        {/* Logo + Nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+        {/* Logo + 桌面导航 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28, minWidth: 0 }}>
           <div
             role="button"
             tabIndex={0}
             aria-label="ChainSure Home"
-            style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', flexShrink: 0 }}
             onClick={goHome}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -105,46 +169,19 @@ export function NavBar() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <span style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em', color: T.tx }}>ChainSure</span>
-              <span style={{ fontSize: 10, color: T.gold, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{$('brand_sub')}</span>
+              <span className="navbar-brand-sub" style={{ fontSize: 10, color: T.gold, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                {$('brand_sub')}
+              </span>
             </div>
           </div>
 
-          <div role="navigation" aria-label={$('footer_nav')} style={{ display: 'flex', gap: 4, marginLeft: 16 }}>
-            {navItems.map((item) => {
-              const active = page === item.id;
-              return (
-              <button
-                key={item.id}
-                type="button"
-                aria-current={active ? 'page' : undefined}
-                onClick={() => setPage(item.id)}
-                style={{
-                  padding: '10px 18px',
-                  borderRadius: 10,
-                  border: active ? '1px solid ' + T.goldBd : '1px solid transparent',
-                  background: active ? T.goldBg : 'transparent',
-                  color: active ? T.gold : T.tx3,
-                  fontSize: 13,
-                  fontWeight: active ? 600 : 500,
-                  cursor: 'pointer',
-                  fontFamily: FONT_SANS,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  transition: 'all 0.2s ease',
-                  letterSpacing: '0.01em',
-                }}
-              >
-                <span style={{ opacity: active ? 1 : 0.5 }}>{item.icon}</span>
-                {$(item.labelKey)}
-              </button>
-            );
-            })}
+          <div role="navigation" aria-label={$('footer_nav')} className="navbar-desktop-nav">
+            {navItems.map((item) => renderNavButton(item))}
           </div>
         </div>
 
-        {/* Right: Language + Wallet */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* 右侧：语言 + 钱包 + 汉堡 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
           <div ref={langMenuRef} style={{ position: 'relative' }}>
             <button
               type="button"
@@ -238,7 +275,7 @@ export function NavBar() {
           )}
 
           <button
-            onClick={wallet ? () => setPage('wallet') : connect}
+            onClick={wallet ? () => goToPage('wallet') : connect}
             disabled={loading}
             style={{
               height: 40,
@@ -268,8 +305,34 @@ export function NavBar() {
             />
             {loading ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
           </button>
+
+          <button
+            ref={mobileToggleRef}
+            type="button"
+            className="navbar-mobile-toggle"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="navbar-mobile-panel"
+            aria-label={mobileMenuOpen ? $('nav_menu_close') : $('nav_menu_open')}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            <span aria-hidden style={{ fontSize: 18, lineHeight: 1 }}>
+              {mobileMenuOpen ? '✕' : '☰'}
+            </span>
+          </button>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div
+          ref={mobilePanelRef}
+          id="navbar-mobile-panel"
+          role="navigation"
+          aria-label={$('footer_nav')}
+          className="navbar-mobile-panel"
+        >
+          {navItems.map((item) => renderNavButton(item, true))}
+        </div>
+      )}
     </nav>
   );
 }

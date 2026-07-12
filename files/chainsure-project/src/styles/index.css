@@ -108,4 +108,58 @@ input[type='date']::-webkit-calendar-picker-indicator {
   .nft-grid {
     grid-template-columns: 1fr !important;
   }
+
+  /* NavBar 移动端汉堡菜单（CS-009） */
+  .navbar-desktop-nav {
+    display: none !important;
+  }
+
+  .navbar-mobile-toggle {
+    display: flex !important;
+  }
+
+  .navbar-inner {
+    padding: 0 16px !important;
+  }
+
+  .navbar-brand-sub {
+    display: none;
+  }
+}
+
+/* NavBar 桌面导航 / 移动端切换 */
+.navbar-desktop-nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 16px;
+}
+
+.navbar-mobile-toggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #94a3b8;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.navbar-mobile-toggle:hover {
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.navbar-mobile-panel {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 10, 20, 0.95);
+  backdrop-filter: blur(20px) saturate(1.2);
+  padding: 8px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
