@@ -10,7 +10,7 @@
   [![React](https://img.shields.io/badge/React-18.2-61dafb.svg)](https://reactjs.org/)
   [![Rialo](https://img.shields.io/badge/Rialo-Devnet-gold.svg)](https://rialo.network/)
   
-  [Documentation](./docs/) · [Demo](https://chainsure.app) · [Report Bug](https://github.com/chainsure/protocol/issues)
+  [Documentation](./docs/) · [Demo](https://georgescoote.github.io/rialo-/) · [Report Bug](https://github.com/GeorgeScoote/rialo-/issues)
 </div>
 
 ---
