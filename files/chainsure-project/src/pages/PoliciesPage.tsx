@@ -2,21 +2,26 @@ import { useState } from 'react';
 import { useApp } from '@/state/AppContext';
 import { useLang } from '@i18n/LangContext';
 import { DELAY_THRESHOLD, KELVIN_PER_ETH, PolicyStatus } from '@/lib/constants';
-import { n, sleep } from '@/lib/format';
+import { getPolicyLifecycle } from '@/lib/policyStatus';
+import { n, sleep, shortSig } from '@/lib/format';
+import { PolicyDetailPanel } from '@components/PolicyDetailPanel';
 import { Badge, Button, Card, Empty } from '@components/ui';
 import { FONT_MONO, T } from '@/theme/tokens';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export function PoliciesPage() {
-  const { wallet, policies, settlePolicy, settleWCPolicy, setPage, addDemoPolicy, connect } = useApp();
+  const { wallet, policies, claims, settlePolicy, settleWCPolicy, setPage, addDemoPolicy, connect } = useApp();
   const { $ } = useLang();
   const [settling, setSettling] = useState<string | null>(null);
   const [settleStep, setSettleStep] = useState(0);
   const [settleMsg, setSettleMsg] = useState('');
   const [settleResult, setSettleResult] = useState<any>(null);
+  const [detailPolicy, setDetailPolicy] = useState<any>(null);
 
   const today = new Date().toISOString().split('T')[0];
+
+  const findClaim = (policy: any) => claims.find((c: any) => c.policy === policy.address);
 
   const handleDemoWithConnect = async () => {
     await connect();
@@ -221,6 +226,83 @@ export function PoliciesPage() {
     </div>
   );
 
+  const renderPolicyCard = (p: any, isHistory = false) => {
+    const canSettle = p.type === 'worldcup' || p.date <= today;
+    const isSettling = settling === p.address;
+    const payoutETH = Number(p.payoutAmount / KELVIN_PER_ETH);
+    const lifecycle = getPolicyLifecycle(p, today);
+    const isClaimed = p.status === PolicyStatus.Claimed;
+
+    return (
+      <Card key={p.address} style={isHistory ? { opacity: 0.75 } : undefined}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              {p.type === 'worldcup' ? (
+                <span style={{ fontSize: isHistory ? 20 : 22 }}>{p.wcTeam?.flag}</span>
+              ) : (
+                <span style={{ fontFamily: FONT_MONO, fontSize: isHistory ? 16 : 20, fontWeight: 700 }}>{p.flightIata}</span>
+              )}
+              {!isHistory && p.status === PolicyStatus.Active && <Badge variant="success">{$('policy_active')}</Badge>}
+              {isHistory && (
+                <Badge variant={isClaimed ? 'success' : 'error'}>
+                  {isClaimed ? $('claimed') + ' +' + n(payoutETH) : $('expired')}
+                </Badge>
+              )}
+              {p.type === 'worldcup' && <Badge variant="warning">⚽ {$('product_worldcup')}</Badge>}
+              <Badge variant={lifecycle === 'claimed' ? 'success' : lifecycle === 'ready' ? 'warning' : lifecycle === 'waiting' ? 'info' : 'error'}>
+                {$('policy_lifecycle_' + lifecycle)}
+              </Badge>
+            </div>
+            <div style={{ fontSize: 13, color: T.tx3, marginTop: 6 }}>
+              {p.type === 'worldcup'
+                ? p.wcTeam?.name + ' · ' + (p.wcBetType === 'win' ? $('worldcup_bet_win') : $('worldcup_bet_draw'))
+                : p.depAirport + ' → ' + p.arrAirport}
+            </div>
+            <div style={{ fontSize: 12, color: T.tx4, marginTop: 2 }}>
+              {p.type === 'worldcup' ? p.wcMatch?.date + ' · ' + p.wcMatch?.venue : p.date + ' ' + p.scheduledDeparture}
+            </div>
+            <div style={{ fontSize: 11, color: T.tx4, marginTop: 8, fontFamily: FONT_MONO }}>
+              PDA {p.address.slice(0, 18)}… · TX {shortSig(p.txSignature)}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 11, color: T.tx4 }}>{$('you_get')}</div>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 20, fontWeight: 700 }}>
+              {n(payoutETH)} <span style={{ fontSize: 11, color: T.tx4 }}>ETH</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid ' + T.b, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 12, color: T.tx4 }}>
+            {!isHistory
+              ? p.type === 'worldcup'
+                ? '⚽ ' + $('worldcup_pending')
+                : canSettle
+                  ? '✅ ' + $('can_settle')
+                  : '⏰ ' + $('waiting_flight', { date: p.date })
+              : p.type === 'worldcup' && p.wcResultScore
+                ? p.wcResultScore
+                : p.actualDelayMinutes != null
+                  ? $('delay_min', { min: p.actualDelayMinutes })
+                  : ''}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button onClick={() => setDetailPolicy(p)} variant="ghost" size="sm">
+              {$('policy_view_detail')}
+            </Button>
+            {!isHistory && (p.type === 'worldcup' || canSettle) && (
+              <Button onClick={() => handleSettle(p)} disabled={isSettling} size="sm">
+                {isSettling ? $('settling') : $('settle_now')}
+              </Button>
+            )}
+            {!isHistory && !canSettle && p.type !== 'worldcup' && <Badge>{$('waiting')}</Badge>}
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
   if (!wallet) return <DemoEntryCard />;
 
   const active = policies.filter((p: any) => p.status === PolicyStatus.Active);
@@ -229,6 +311,21 @@ export function PoliciesPage() {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 24px' }}>
       <SettleModal />
+      {detailPolicy && (
+        <PolicyDetailPanel
+          policy={detailPolicy}
+          claim={findClaim(detailPolicy)}
+          onClose={() => setDetailPolicy(null)}
+          onSettle={
+            detailPolicy.status === PolicyStatus.Active
+              ? () => {
+                  handleSettle(detailPolicy);
+                }
+              : undefined
+          }
+          settling={settling === detailPolicy.address}
+        />
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 26, fontWeight: 700 }}>{$('my_policies')}</h1>
@@ -266,87 +363,14 @@ export function PoliciesPage() {
           {active.length > 0 && (
             <>
               <div style={{ fontSize: 12, fontWeight: 600, color: T.tx4, textTransform: 'uppercase' }}>{$('active_policies')} ({active.length})</div>
-              {active.map((p: any) => {
-                const canSettle = p.date <= today;
-                const isSettling = settling === p.address;
-                const payoutETH = Number(p.payoutAmount / KELVIN_PER_ETH);
-                return (
-                  <Card key={p.address}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          {p.type === 'worldcup' ? (
-                            <span style={{ fontSize: 22 }}>{p.wcTeam?.flag}</span>
-                          ) : (
-                            <span style={{ fontFamily: FONT_MONO, fontSize: 20, fontWeight: 700 }}>{p.flightIata}</span>
-                          )}
-                          <Badge variant="success">{$('policy_active')}</Badge>
-                          {p.type === 'worldcup' && <Badge variant="warning">⚽ {$('product_worldcup')}</Badge>}
-                        </div>
-                        <div style={{ fontSize: 13, color: T.tx3, marginTop: 6 }}>
-                          {p.type === 'worldcup' ? p.wcTeam?.name + ' · ' + (p.wcBetType === 'win' ? $('worldcup_bet_win') : $('worldcup_bet_draw')) + ' ×' + p.wcOdds : p.depAirport + ' → ' + p.arrAirport}
-                        </div>
-                        <div style={{ fontSize: 12, color: T.tx4, marginTop: 2 }}>
-                          {p.type === 'worldcup' ? p.wcMatch?.date + ' · ' + p.wcMatch?.venue : p.date + ' ' + p.scheduledDeparture}
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 11, color: T.tx4 }}>{$('you_get')}</div>
-                        <div style={{ fontFamily: FONT_MONO, fontSize: 20, fontWeight: 700 }}>
-                          {n(payoutETH)} <span style={{ fontSize: 11, color: T.tx4 }}>ETH</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid ' + T.b, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ fontSize: 12, color: T.tx4 }}>
-                        {p.type === 'worldcup' ? '⚽ ' + $('worldcup_pending') : canSettle ? '✅ ' + $('can_settle') : '⏰ ' + $('waiting_flight', { date: p.date })}
-                      </div>
-                      {p.type === 'worldcup' || canSettle ? (
-                        <Button onClick={() => handleSettle(p)} disabled={isSettling} size="sm">
-                          {isSettling ? $('settling') : $('settle_now')}
-                        </Button>
-                      ) : (
-                        <Badge>{$('waiting')}</Badge>
-                      )}
-                    </div>
-                  </Card>
-                );
-              })}
+              {active.map((p: any) => renderPolicyCard(p))}
             </>
           )}
 
           {history.length > 0 && (
             <>
               <div style={{ fontSize: 12, fontWeight: 600, color: T.tx4, textTransform: 'uppercase', marginTop: 16 }}>{$('history_policies')} ({history.length})</div>
-              {history.map((p: any) => {
-                const payoutETH = Number(p.payoutAmount / KELVIN_PER_ETH);
-                const isClaimed = p.status === PolicyStatus.Claimed;
-                return (
-                  <Card key={p.address} style={{ opacity: 0.75 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        {p.type === 'worldcup' ? (
-                          <span style={{ fontSize: 20 }}>{p.wcTeam?.flag}</span>
-                        ) : (
-                          <span style={{ fontFamily: FONT_MONO, fontSize: 16, fontWeight: 600 }}>{p.flightIata}</span>
-                        )}
-                        <span style={{ fontSize: 12, color: T.tx4 }}>{p.type === 'worldcup' ? p.wcMatch?.date : p.date}</span>
-                        {p.type === 'worldcup' && <Badge variant="warning">⚽ 世界杯</Badge>}
-                        <Badge variant={isClaimed ? 'success' : 'error'}>
-                          {isClaimed
-                            ? $('claimed') + ' +' + n(payoutETH)
-                            : p.type === 'worldcup'
-                              ? $('expired') + (p.wcResultScore ? ' · ' + p.wcResultScore : '')
-                              : $('expired') + ' (' + $('delay_min', { min: p.actualDelayMinutes }) + ')'}
-                        </Badge>
-                      </div>
-                      <div style={{ fontSize: 12, color: T.tx4 }}>
-                        {p.type === 'worldcup' ? p.wcTeam?.name + ' · ' + (p.wcBetType === 'win' ? $('worldcup_win_short') : $('worldcup_draw_short')) : p.depAirport + ' → ' + p.arrAirport}
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
+              {history.map((p: any) => renderPolicyCard(p, true))}
             </>
           )}
         </div>

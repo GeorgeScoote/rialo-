@@ -206,7 +206,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPolicies((prev) =>
         prev.map((p) =>
           p.address === policy.address
-            ? { ...p, status: hit ? PolicyStatus.Claimed : PolicyStatus.Expired, settledAt: Date.now(), actualDelayMinutes: delayed }
+            ? { ...p, status: hit ? PolicyStatus.Claimed : PolicyStatus.Expired, settledAt: Date.now(), actualDelayMinutes: delayed, settleTxSignature: result.signature }
             : p
         )
       );
@@ -343,7 +343,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPolicies((prev) =>
         prev.map((p) =>
           p.address === policy.address
-            ? { ...p, status: won ? PolicyStatus.Claimed : PolicyStatus.Expired, settledAt: Date.now(), wcResultScore: score }
+            ? { ...p, status: won ? PolicyStatus.Claimed : PolicyStatus.Expired, settledAt: Date.now(), wcResultScore: score, settleTxSignature: sig }
             : p
         )
       );
