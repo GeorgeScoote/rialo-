@@ -9,6 +9,7 @@ import {
   type Flight,
 } from '@/lib/constants';
 import { n, shortAddr, sleep } from '@/lib/format';
+import { isAppPage, parseHashPage, syncHashPage, type AppPage } from '@/lib/routes';
 import { getClaimAddress, getPolicyAddress, rialoSDK } from '@sdk/rialo';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -30,9 +31,9 @@ interface AppContextValue {
   policies: any[];
   claims: any[];
   txHistory: Tx[];
-  page: string;
+  page: AppPage;
   loading: boolean;
-  setPage: (p: string) => void;
+  setPage: (p: AppPage | string) => void;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   purchasePolicy: (flight: Flight, date: string, payoutAmount: number, premiumAmount: number) => Promise<any>;
@@ -58,12 +59,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [policies, setPolicies] = useState<any[]>([]);
   const [claims, setClaims] = useState<any[]>([]);
   const [txHistory, setTxHistory] = useState<Tx[]>([]);
-  const [page, setPage] = useState('home');
+  const [page, setPageState] = useState<AppPage>(() => parseHashPage());
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     rialoSDK.initialize();
     return () => rialoSDK.destroy();
+  }, []);
+
+  // hash 路由：支持 #/home 分享链接，浏览器前进/后退
+  useEffect(() => {
+    const current = parseHashPage();
+    setPageState(current);
+    const expected = `#/${current}`;
+    if (window.location.hash !== expected) {
+      syncHashPage(current, true);
+    }
+
+    const onHashChange = () => {
+      setPageState(parseHashPage());
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  const setPage = useCallback((p: AppPage | string) => {
+    const next: AppPage = isAppPage(p) ? p : 'home';
+    setPageState(next);
+    syncHashPage(next);
   }, []);
 
   const addTx = useCallback((tx: Tx) => setTxHistory((prev) => [tx, ...prev]), []);
