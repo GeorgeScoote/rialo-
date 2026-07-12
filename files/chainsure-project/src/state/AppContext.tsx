@@ -87,7 +87,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setWallet(accountAddress);
       const bal = await rialoSDK.getBalance(accountAddress);
       setBalance(bal);
-      addTx({ type: 'connect', time: Date.now(), desc: '钱包已连接', address: shortAddr(accountAddress) });
+      addTx({ type: 'connect', time: Date.now(), address: shortAddr(accountAddress) });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error('[App] Connect failed:', e);
@@ -101,7 +101,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBalance(0n);
     setPolicies([]);
     setClaims([]);
-    addTx({ type: 'disconnect', time: Date.now(), desc: '钱包已断开' });
+    addTx({ type: 'disconnect', time: Date.now() });
   }, [addTx]);
 
   const getTodayPolicyCount = useCallback(() => {

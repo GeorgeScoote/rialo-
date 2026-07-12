@@ -13,6 +13,21 @@
   [Documentation](./docs/) · [Demo](https://georgescoote.github.io/rialo-/) · [Report Bug](https://github.com/GeorgeScoote/rialo-/issues)
 </div>
 
+## Demo 部署
+
+线上地址：https://georgescoote.github.io/rialo-/
+
+首次启用 Pages：**Settings → Pages → Deploy from a branch → main / (root)**
+
+更新前端：
+
+```bash
+cd files/chainsure-project
+npm run deploy:pages
+```
+
+然后在仓库根目录提交 `index.html` 与 `assets/` 并推送。
+
 ---
 
 ## Overview

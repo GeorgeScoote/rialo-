@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  // GitHub Pages 项目站：https://georgescoote.github.io/rialo-/
+  base: '/rialo-/',
   plugins: [react()],
   resolve: {
     alias: {
@@ -23,7 +25,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
