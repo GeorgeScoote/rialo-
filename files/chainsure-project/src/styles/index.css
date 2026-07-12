@@ -66,3 +66,9 @@ input[type='date']::-webkit-calendar-picker-indicator {
     transform: translateY(0);
   }
 }
+
+@media (max-width: 960px) {
+  .nft-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

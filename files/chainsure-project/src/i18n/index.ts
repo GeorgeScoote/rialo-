@@ -61,6 +61,13 @@ export const translations = {
     nft_register_now: '立即登记',
     nft_mint_locked: 'Mint Now（开发中）',
 
+    nft_rarity_legendary: '传奇',
+    nft_rarity_epic: '史诗',
+    nft_rarity_rare: '稀有',
+    nft_sample_flight: '航班 · 青蓝级',
+    nft_sample_multi: '多链 · 紫晶级',
+    nft_sample_shield: '护盾 · 蓝冰级',
+
     nft_progress_contract: '智能合约',
     nft_progress_mint_ui: 'Mint UI',
     nft_progress_metadata: '元数据存储',
@@ -343,6 +350,13 @@ export const translations = {
     nft_notify_me: 'Notify me on launch',
     nft_register_now: 'Register Now',
     nft_mint_locked: 'Mint Now (Coming Soon)',
+
+    nft_rarity_legendary: 'Legendary',
+    nft_rarity_epic: 'Epic',
+    nft_rarity_rare: 'Rare',
+    nft_sample_flight: 'Flight · Cyan Tier',
+    nft_sample_multi: 'Multi-Chain · Purple',
+    nft_sample_shield: 'Shield · Blue Tier',
 
     nft_progress_contract: 'Smart Contracts',
     nft_progress_mint_ui: 'Mint UI',
@@ -646,6 +660,13 @@ export const translations = {
     nft_register_now: '今すぐ登録',
     nft_mint_locked: 'Mint Now（開発中）',
 
+    nft_rarity_legendary: 'レジェンダリー',
+    nft_rarity_epic: 'エピック',
+    nft_rarity_rare: 'レア',
+    nft_sample_flight: 'フライト · シアン',
+    nft_sample_multi: 'マルチチェーン · パープル',
+    nft_sample_shield: 'シールド · ブルー',
+
     nft_progress_contract: 'スマートコントラクト',
     nft_progress_mint_ui: 'Mint UI',
     nft_progress_metadata: 'メタデータ保存',
@@ -927,6 +948,13 @@ export const translations = {
     nft_notify_me: '출시 시 알림',
     nft_register_now: '지금 등록',
     nft_mint_locked: 'Mint Now (개발 중)',
+
+    nft_rarity_legendary: '레전더리',
+    nft_rarity_epic: '에픽',
+    nft_rarity_rare: '레어',
+    nft_sample_flight: '항공 · 시안',
+    nft_sample_multi: '멀티체인 · 퍼플',
+    nft_sample_shield: '실드 · 블루',
 
     nft_progress_contract: '스마트 컨트랙트',
     nft_progress_mint_ui: 'Mint UI',
