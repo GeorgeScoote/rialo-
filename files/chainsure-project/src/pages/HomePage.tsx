@@ -325,25 +325,17 @@ export function HomePage() {
           <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em', color: T.tx }}>
             {product === 'flight'
               ? $('page_title')
-              : product === 'logistics'
-                ? $('page_title_logistics')
-                : product === 'auto'
-                  ? $('page_title_auto')
-                  : product === 'worldcup'
-                    ? $('worldcup_title')
-                    : $('page_title')}
+              : product === 'worldcup'
+                ? $('worldcup_title')
+                : $('page_title')}
           </h1>
         </div>
         <p style={{ fontSize: 14, color: T.tx3, lineHeight: 1.6, maxWidth: 520 }}>
           {product === 'flight'
             ? $('page_desc', { threshold: DELAY_THRESHOLD })
-            : product === 'logistics'
-              ? $('page_desc_logistics')
-              : product === 'auto'
-                ? $('page_desc_auto')
-                : product === 'worldcup'
-                  ? $('worldcup_desc')
-                  : $('page_desc', { threshold: DELAY_THRESHOLD })}
+            : product === 'worldcup'
+              ? $('worldcup_desc')
+              : $('page_desc', { threshold: DELAY_THRESHOLD })}
         </p>
       </div>
 
