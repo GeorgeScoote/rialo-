@@ -140,6 +140,10 @@ input[type='date']::-webkit-calendar-picker-indicator {
     display: none;
   }
 
+  .navbar-wallet-btn.is-connecting {
+    pointer-events: none;
+  }
+
   .navbar-actions {
     gap: 8px !important;
   }

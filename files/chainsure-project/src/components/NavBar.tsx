@@ -59,6 +59,14 @@ export function NavBar() {
 
   void disconnect;
 
+  const isConnecting = loading && !wallet;
+
+  const handleWalletClick = () => {
+    if (isConnecting) return;
+    if (wallet) goToPage('wallet');
+    else connect();
+  };
+
   const navItems = [
     { id: 'home', labelKey: 'nav_insure', icon: '◈' },
     { id: 'policies', labelKey: 'nav_policies', icon: '◇' },
@@ -276,10 +284,12 @@ export function NavBar() {
           )}
 
           <button
-            className={'navbar-wallet-btn' + (wallet ? ' is-connected' : '')}
-            onClick={wallet ? () => goToPage('wallet') : connect}
-            disabled={loading}
-            aria-label={loading ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
+            type="button"
+            className={'navbar-wallet-btn' + (wallet ? ' is-connected' : '') + (isConnecting ? ' is-connecting' : '')}
+            onClick={handleWalletClick}
+            disabled={isConnecting}
+            aria-busy={isConnecting}
+            aria-label={isConnecting ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
             style={{
               height: 40,
               padding: '0 20px',
@@ -289,12 +299,13 @@ export function NavBar() {
               color: wallet ? T.success : T.tx2,
               fontSize: 13,
               fontWeight: 600,
-              cursor: loading ? 'wait' : 'pointer',
+              cursor: isConnecting ? 'wait' : 'pointer',
               fontFamily: FONT_SANS,
               display: 'flex',
               alignItems: 'center',
               gap: 10,
               transition: 'all 0.2s ease',
+              opacity: isConnecting ? 0.55 : 1,
             }}
           >
             <span
@@ -302,12 +313,12 @@ export function NavBar() {
                 width: 8,
                 height: 8,
                 borderRadius: '50%',
-                background: wallet ? T.success : T.tx4,
-                boxShadow: wallet ? '0 0 8px ' + T.success : 'none',
+                background: isConnecting ? T.gold : wallet ? T.success : T.tx4,
+                boxShadow: isConnecting ? '0 0 8px ' + T.gold : wallet ? '0 0 8px ' + T.success : 'none',
               }}
             />
             <span className="navbar-wallet-label">
-              {loading ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
+              {isConnecting ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
             </span>
           </button>
 

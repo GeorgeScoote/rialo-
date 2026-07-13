@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   DELAY_THRESHOLD,
   ethToKelvin,
@@ -61,6 +61,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [txHistory, setTxHistory] = useState<Tx[]>([]);
   const [page, setPageState] = useState<AppRoute>(() => parseHashRoute());
   const [loading, setLoading] = useState(false);
+  const connectingRef = useRef(false);
 
   useEffect(() => {
     rialoSDK.initialize();
@@ -106,6 +107,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [wallet]);
 
   const connect = useCallback(async () => {
+    if (connectingRef.current) return;
+    connectingRef.current = true;
     setLoading(true);
     try {
       const { accountAddress } = await rialoSDK.connect('Rialo');
@@ -116,8 +119,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error('[App] Connect failed:', e);
+    } finally {
+      connectingRef.current = false;
+      setLoading(false);
     }
-    setLoading(false);
   }, [addTx]);
 
   const disconnect = useCallback(async () => {
