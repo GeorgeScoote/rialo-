@@ -4,11 +4,15 @@ export const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeou
 
 import { KELVIN_PER_ETH } from '@/lib/constants';
 
+/** Kelvin（链上最小单位）→ ETH 数值 */
+export const kelvinToEth = (kelvin: bigint): number =>
+  Number(kelvin) / Number(KELVIN_PER_ETH);
+
 /** 数字格式化：支持小数 ETH 显示 */
 export const n = (v: number | bigint): string => {
   const num =
     typeof v === 'bigint'
-      ? Number(v) / Number(KELVIN_PER_ETH)
+      ? kelvinToEth(v)
       : v;
   if (!Number.isFinite(num)) return '0';
   const abs = Math.abs(num);

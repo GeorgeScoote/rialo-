@@ -1,21 +1,21 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import { KELVIN_PER_ETH } from '@/lib/constants';
-import { n } from '@/lib/format';
+import { kelvinToEth, n } from '@/lib/format';
 import { FONT_MONO, FONT_SANS, T } from '@/theme/tokens';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/** 数字滚动动画 */
+/** 数字滚动动画（支持小数 ETH） */
 export function Anim({ value }: { value: bigint | number }) {
   const [v, setV] = useState(0);
-  const target = typeof value === 'bigint' ? Number(value / KELVIN_PER_ETH) : value;
+  const target = typeof value === 'bigint' ? kelvinToEth(value) : value;
   useEffect(() => {
     let from = v;
     let start: number | null = null;
     const step = (ts: number) => {
       if (start === null) start = ts;
       const p = Math.min((ts - start) / 400, 1);
-      setV(Math.round(from + (target - from) * (1 - Math.pow(1 - p, 3))));
+      const eased = 1 - Math.pow(1 - p, 3);
+      setV(from + (target - from) * eased);
       if (p < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
