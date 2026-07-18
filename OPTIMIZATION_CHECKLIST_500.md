@@ -23,7 +23,7 @@
 - [x] CS-013 [P1] NavBar 已连接点击跳转 wallet（已有，验 UX）
 - [x] CS-014 [P2] NavBar 顶栏增加断开连接下拉
 - [x] CS-015 [P1] NavBar disconnect 接入（当前 void）
-- [ ] CS-016 [P2] NavBar sticky 滚动阴影增强
+- [x] CS-016 [P2] NavBar sticky 滚动阴影增强
 - [ ] CS-017 [P1] SiteFooter Program ID 一键复制
 - [ ] CS-018 [P1] SiteFooter 导航链接 hover 无障碍 focus 环
 - [ ] CS-019 [P2] SiteFooter 增加 GitHub 仓库外链

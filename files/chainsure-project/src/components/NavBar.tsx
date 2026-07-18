@@ -18,6 +18,15 @@ export function NavBar() {
   const walletMenuRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const mobilePanelRef = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  // 滚动时增强顶栏阴影，区分内容区
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // 点击外部或按 Esc 关闭语言 / 钱包 / 移动端菜单
   useEffect(() => {
@@ -152,17 +161,7 @@ export function NavBar() {
   };
 
   return (
-    <nav
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        background: 'rgba(6,10,20,0.85)',
-        backdropFilter: 'blur(20px) saturate(1.2)',
-        borderBottom: '1px solid ' + T.b,
-        boxShadow: '0 4px 30px rgba(0,0,0,0.3)',
-      }}
-    >
+    <nav className={'app-navbar' + (scrolled ? ' is-scrolled' : '')}>
       <div
         className="navbar-inner"
         style={{
