@@ -12,18 +12,23 @@ export function NavBar() {
   const { wallet, balance, page, setPage, connect, disconnect, loading } = useApp();
   const { lang, setLang, $ } = useLang();
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showWalletMenu, setShowWalletMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
+  const walletMenuRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const mobilePanelRef = useRef<HTMLDivElement>(null);
 
-  // 点击外部或按 Esc 关闭语言选择 / 移动端菜单
+  // 点击外部或按 Esc 关闭语言 / 钱包 / 移动端菜单
   useEffect(() => {
-    if (!showLangMenu && !mobileMenuOpen) return;
+    if (!showLangMenu && !showWalletMenu && !mobileMenuOpen) return;
     const onPointerDown = (e: MouseEvent) => {
       const target = e.target as Node;
       if (showLangMenu && langMenuRef.current && !langMenuRef.current.contains(target)) {
         setShowLangMenu(false);
+      }
+      if (showWalletMenu && walletMenuRef.current && !walletMenuRef.current.contains(target)) {
+        setShowWalletMenu(false);
       }
       if (
         mobileMenuOpen &&
@@ -36,6 +41,7 @@ export function NavBar() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setShowLangMenu(false);
+        setShowWalletMenu(false);
         setMobileMenuOpen(false);
       }
     };
@@ -45,19 +51,20 @@ export function NavBar() {
       document.removeEventListener('mousedown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [showLangMenu, mobileMenuOpen]);
+  }, [showLangMenu, showWalletMenu, mobileMenuOpen]);
 
   // 切回桌面宽度时收起移动端菜单
   useEffect(() => {
     const mq = window.matchMedia(MOBILE_NAV_MQ);
     const onChange = () => {
-      if (!mq.matches) setMobileMenuOpen(false);
+      if (!mq.matches) {
+        setMobileMenuOpen(false);
+        setShowWalletMenu(false);
+      }
     };
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
   }, []);
-
-  void disconnect;
 
   const isConnecting = loading && !wallet;
   const isWalletPage = page === 'wallet';
@@ -70,19 +77,30 @@ export function NavBar() {
 
   const openWallet = () => {
     if (isConnecting || !wallet) return;
+    setShowWalletMenu(false);
     goToPage('wallet');
+  };
+
+  const handleDisconnect = async () => {
+    setShowWalletMenu(false);
+    setMobileMenuOpen(false);
+    await disconnect();
   };
 
   const handleWalletClick = () => {
     if (isConnecting) return;
-    if (wallet) openWallet();
-    else connect();
+    if (wallet) {
+      setShowLangMenu(false);
+      setShowWalletMenu((open) => !open);
+    } else {
+      connect();
+    }
   };
 
   const walletBtnLabel = isConnecting
     ? $('connecting')
     : wallet
-      ? `${$('nav_wallet_open')} · ${shortAddr(wallet)}`
+      ? `${shortAddr(wallet)} · ${$('connected')}`
       : $('connect_wallet');
 
   const navItems = [
@@ -208,7 +226,10 @@ export function NavBar() {
               type="button"
               aria-expanded={showLangMenu}
               aria-haspopup="listbox"
-              onClick={() => setShowLangMenu(!showLangMenu)}
+              onClick={() => {
+                setShowWalletMenu(false);
+                setShowLangMenu(!showLangMenu);
+              }}
               style={{
                 height: 36,
                 padding: '0 12px',
@@ -307,51 +328,83 @@ export function NavBar() {
             </div>
           )}
 
-          <button
-            type="button"
-            className={
-              'navbar-wallet-btn' +
-              (wallet ? ' is-connected' : '') +
-              (isConnecting ? ' is-connecting' : '') +
-              (wallet && isWalletPage ? ' is-active' : '')
-            }
-            onClick={handleWalletClick}
-            disabled={isConnecting}
-            aria-busy={isConnecting}
-            aria-current={wallet && isWalletPage ? 'page' : undefined}
-            aria-label={walletBtnLabel}
-            title={wallet ? walletBtnLabel : undefined}
-            style={{
-              height: 40,
-              padding: '0 20px',
-              borderRadius: 10,
-              border: '1px solid ' + (wallet ? T.successBd : T.b2),
-              background: wallet ? T.successBg : 'rgba(255,255,255,0.03)',
-              color: wallet ? T.success : T.tx2,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: isConnecting ? 'wait' : 'pointer',
-              fontFamily: FONT_SANS,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              transition: 'all 0.2s ease',
-              opacity: isConnecting ? 0.55 : 1,
-            }}
-          >
-            <span
+          <div ref={walletMenuRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              className={
+                'navbar-wallet-btn' +
+                (wallet ? ' is-connected' : '') +
+                (isConnecting ? ' is-connecting' : '') +
+                (wallet && isWalletPage ? ' is-active' : '') +
+                (wallet && showWalletMenu ? ' is-menu-open' : '')
+              }
+              onClick={handleWalletClick}
+              disabled={isConnecting}
+              aria-busy={isConnecting}
+              aria-expanded={wallet ? showWalletMenu : undefined}
+              aria-haspopup={wallet ? 'menu' : undefined}
+              aria-current={wallet && isWalletPage ? 'page' : undefined}
+              aria-label={walletBtnLabel}
+              title={wallet ? walletBtnLabel : undefined}
               style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: isConnecting ? T.gold : wallet ? T.success : T.tx4,
-                boxShadow: isConnecting ? '0 0 8px ' + T.gold : wallet ? '0 0 8px ' + T.success : 'none',
+                height: 40,
+                padding: '0 20px',
+                borderRadius: 10,
+                border: '1px solid ' + (wallet ? T.successBd : T.b2),
+                background: wallet ? T.successBg : 'rgba(255,255,255,0.03)',
+                color: wallet ? T.success : T.tx2,
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: isConnecting ? 'wait' : 'pointer',
+                fontFamily: FONT_SANS,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                transition: 'all 0.2s ease',
+                opacity: isConnecting ? 0.55 : 1,
               }}
-            />
-            <span className="navbar-wallet-label">
-              {isConnecting ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
-            </span>
-          </button>
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: isConnecting ? T.gold : wallet ? T.success : T.tx4,
+                  boxShadow: isConnecting ? '0 0 8px ' + T.gold : wallet ? '0 0 8px ' + T.success : 'none',
+                }}
+              />
+              <span className="navbar-wallet-label">
+                {isConnecting ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
+              </span>
+              {wallet && (
+                <span className="navbar-wallet-chevron" aria-hidden style={{ fontSize: 10, opacity: 0.7 }}>
+                  ▾
+                </span>
+              )}
+            </button>
+            {wallet && showWalletMenu && (
+              <div className="navbar-wallet-menu" role="menu" aria-label={$('nav_wallet')}>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="navbar-wallet-menu-item"
+                  onClick={openWallet}
+                >
+                  <span aria-hidden>○</span>
+                  {$('nav_wallet_open')}
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="navbar-wallet-menu-item is-danger"
+                  onClick={() => void handleDisconnect()}
+                >
+                  <span aria-hidden>⏻</span>
+                  {$('disconnect')}
+                </button>
+              </div>
+            )}
+          </div>
 
           <button
             ref={mobileToggleRef}
@@ -378,6 +431,15 @@ export function NavBar() {
           className="navbar-mobile-panel"
         >
           {navItems.map((item) => renderNavButton(item, true))}
+          {wallet && (
+            <button
+              type="button"
+              className="navbar-mobile-disconnect"
+              onClick={() => void handleDisconnect()}
+            >
+              {$('disconnect')}
+            </button>
+          )}
           <div className="navbar-mobile-panel-lang">
             {Object.values(LANGS).map((l) => (
               <button
