@@ -33,6 +33,7 @@ interface AppContextValue {
   txHistory: Tx[];
   page: AppRoute;
   loading: boolean;
+  disconnecting: boolean;
   setPage: (p: AppPage | string) => void;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
@@ -61,7 +62,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [txHistory, setTxHistory] = useState<Tx[]>([]);
   const [page, setPageState] = useState<AppRoute>(() => parseHashRoute());
   const [loading, setLoading] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const connectingRef = useRef(false);
+  const disconnectingRef = useRef(false);
 
   useEffect(() => {
     rialoSDK.initialize();
@@ -126,13 +129,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [addTx]);
 
   const disconnect = useCallback(async () => {
-    await rialoSDK.disconnect();
-    setWallet(null);
-    setBalance(0n);
-    setPolicies([]);
-    setClaims([]);
-    addTx({ type: 'disconnect', time: Date.now() });
-  }, [addTx]);
+    if (disconnectingRef.current || !wallet) return;
+    disconnectingRef.current = true;
+    setDisconnecting(true);
+    try {
+      await rialoSDK.disconnect();
+      setWallet(null);
+      setBalance(0n);
+      setPolicies([]);
+      setClaims([]);
+      addTx({ type: 'disconnect', time: Date.now() });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('[App] Disconnect failed:', e);
+    } finally {
+      disconnectingRef.current = false;
+      setDisconnecting(false);
+    }
+  }, [addTx, wallet]);
 
   const getTodayPolicyCount = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -392,6 +406,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         txHistory,
         page,
         loading,
+        disconnecting,
         setPage,
         connect,
         disconnect,

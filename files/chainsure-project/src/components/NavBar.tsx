@@ -9,7 +9,7 @@ import { FONT_MONO, FONT_SANS, T } from '@/theme/tokens';
 const MOBILE_NAV_MQ = '(max-width: 960px)';
 
 export function NavBar() {
-  const { wallet, balance, page, setPage, connect, disconnect, loading } = useApp();
+  const { wallet, balance, page, setPage, connect, disconnect, loading, disconnecting } = useApp();
   const { lang, setLang, $ } = useLang();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showWalletMenu, setShowWalletMenu] = useState(false);
@@ -82,13 +82,15 @@ export function NavBar() {
   };
 
   const handleDisconnect = async () => {
+    if (disconnecting) return;
     setShowWalletMenu(false);
     setMobileMenuOpen(false);
     await disconnect();
+    goToPage('home');
   };
 
   const handleWalletClick = () => {
-    if (isConnecting) return;
+    if (isConnecting || disconnecting) return;
     if (wallet) {
       setShowLangMenu(false);
       setShowWalletMenu((open) => !open);
@@ -339,8 +341,8 @@ export function NavBar() {
                 (wallet && showWalletMenu ? ' is-menu-open' : '')
               }
               onClick={handleWalletClick}
-              disabled={isConnecting}
-              aria-busy={isConnecting}
+              disabled={isConnecting || disconnecting}
+              aria-busy={isConnecting || disconnecting}
               aria-expanded={wallet ? showWalletMenu : undefined}
               aria-haspopup={wallet ? 'menu' : undefined}
               aria-current={wallet && isWalletPage ? 'page' : undefined}
@@ -355,13 +357,13 @@ export function NavBar() {
                 color: wallet ? T.success : T.tx2,
                 fontSize: 13,
                 fontWeight: 600,
-                cursor: isConnecting ? 'wait' : 'pointer',
+                cursor: isConnecting || disconnecting ? 'wait' : 'pointer',
                 fontFamily: FONT_SANS,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
                 transition: 'all 0.2s ease',
-                opacity: isConnecting ? 0.55 : 1,
+                opacity: isConnecting || disconnecting ? 0.55 : 1,
               }}
             >
               <span
@@ -397,10 +399,12 @@ export function NavBar() {
                   type="button"
                   role="menuitem"
                   className="navbar-wallet-menu-item is-danger"
+                  disabled={disconnecting}
+                  aria-busy={disconnecting}
                   onClick={() => void handleDisconnect()}
                 >
                   <span aria-hidden>⏻</span>
-                  {$('disconnect')}
+                  {disconnecting ? $('disconnecting') : $('disconnect')}
                 </button>
               </div>
             )}
@@ -435,9 +439,11 @@ export function NavBar() {
             <button
               type="button"
               className="navbar-mobile-disconnect"
+              disabled={disconnecting}
+              aria-busy={disconnecting}
               onClick={() => void handleDisconnect()}
             >
-              {$('disconnect')}
+              {disconnecting ? $('disconnecting') : $('disconnect')}
             </button>
           )}
           <div className="navbar-mobile-panel-lang">

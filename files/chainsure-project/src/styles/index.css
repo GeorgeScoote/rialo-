@@ -284,6 +284,12 @@ input[type='date']::-webkit-calendar-picker-indicator {
   color: #fca5a5;
 }
 
+.navbar-wallet-menu-item:disabled,
+.navbar-mobile-disconnect:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
 .navbar-wallet-btn.is-menu-open {
   border-color: rgba(34, 197, 94, 0.55);
   background: rgba(34, 197, 94, 0.14);

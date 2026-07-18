@@ -238,6 +238,7 @@ export const translations = {
 
     connect_wallet: '连接钱包',
     connecting: '连接中...',
+    disconnecting: '断开中...',
     confirm_pay: '确认支付 {amount} ETH',
     processing: '处理中...',
     connect_first: '请先连接钱包',
@@ -570,6 +571,7 @@ export const translations = {
 
     connect_wallet: 'Connect Wallet',
     connecting: 'Connecting...',
+    disconnecting: 'Disconnecting...',
     confirm_pay: 'Confirm Payment {amount} ETH',
     processing: 'Processing...',
     connect_first: 'Please connect wallet first',
@@ -901,6 +903,7 @@ export const translations = {
 
     connect_wallet: 'ウォレット接続',
     connecting: '接続中...',
+    disconnecting: '切断中...',
     confirm_pay: '{amount} ETH 支払いを確認',
     processing: '処理中...',
     connect_first: '先にウォレットを接続してください',
@@ -1232,6 +1235,7 @@ export const translations = {
 
     connect_wallet: '지갑 연결',
     connecting: '연결 중...',
+    disconnecting: '연결 해제 중...',
     confirm_pay: '{amount} ETH 결제 확인',
     processing: '처리 중...',
     connect_first: '먼저 지갑을 연결하세요',

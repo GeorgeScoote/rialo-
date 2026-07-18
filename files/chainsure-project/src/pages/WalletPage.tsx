@@ -8,7 +8,7 @@ import { FONT_MONO, T } from '@/theme/tokens';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export function WalletPage() {
-  const { wallet, balance, txHistory, connect, disconnect, loading } = useApp();
+  const { wallet, balance, txHistory, connect, disconnect, loading, disconnecting } = useApp();
   const { $ } = useLang();
 
   if (!wallet) {
@@ -40,8 +40,8 @@ export function WalletPage() {
           <div style={{ fontFamily: FONT_MONO, fontSize: 13, color: T.tx2, wordBreak: 'break-all' }}>{wallet}</div>
         </div>
         <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
-          <Button onClick={disconnect} variant="danger" size="sm">
-            {$('disconnect')}
+          <Button onClick={disconnect} disabled={loading || disconnecting} variant="danger" size="sm">
+            {disconnecting ? $('disconnecting') : $('disconnect')}
           </Button>
         </div>
       </Card>
