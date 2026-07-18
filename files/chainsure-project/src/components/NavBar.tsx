@@ -60,12 +60,30 @@ export function NavBar() {
   void disconnect;
 
   const isConnecting = loading && !wallet;
+  const isWalletPage = page === 'wallet';
+
+  const goToPage = (id: string) => {
+    setPage(id);
+    setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openWallet = () => {
+    if (isConnecting || !wallet) return;
+    goToPage('wallet');
+  };
 
   const handleWalletClick = () => {
     if (isConnecting) return;
-    if (wallet) goToPage('wallet');
+    if (wallet) openWallet();
     else connect();
   };
+
+  const walletBtnLabel = isConnecting
+    ? $('connecting')
+    : wallet
+      ? `${$('nav_wallet_open')} · ${shortAddr(wallet)}`
+      : $('connect_wallet');
 
   const navItems = [
     { id: 'home', labelKey: 'nav_insure', icon: '◈' },
@@ -78,11 +96,6 @@ export function NavBar() {
     setPage('home');
     setMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const goToPage = (id: string) => {
-    setPage(id);
-    setMobileMenuOpen(false);
   };
 
   const renderNavButton = (item: (typeof navItems)[number], compact = false) => {
@@ -265,7 +278,18 @@ export function NavBar() {
 
           {wallet && (
             <div
-              className="navbar-secondary"
+              role="button"
+              tabIndex={0}
+              className="navbar-secondary navbar-balance-btn"
+              aria-label={walletBtnLabel}
+              title={walletBtnLabel}
+              onClick={openWallet}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  openWallet();
+                }
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -285,11 +309,18 @@ export function NavBar() {
 
           <button
             type="button"
-            className={'navbar-wallet-btn' + (wallet ? ' is-connected' : '') + (isConnecting ? ' is-connecting' : '')}
+            className={
+              'navbar-wallet-btn' +
+              (wallet ? ' is-connected' : '') +
+              (isConnecting ? ' is-connecting' : '') +
+              (wallet && isWalletPage ? ' is-active' : '')
+            }
             onClick={handleWalletClick}
             disabled={isConnecting}
             aria-busy={isConnecting}
-            aria-label={isConnecting ? $('connecting') : wallet ? shortAddr(wallet) : $('connect_wallet')}
+            aria-current={wallet && isWalletPage ? 'page' : undefined}
+            aria-label={walletBtnLabel}
+            title={wallet ? walletBtnLabel : undefined}
             style={{
               height: 40,
               padding: '0 20px',

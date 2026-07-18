@@ -20,7 +20,7 @@
 - [x] CS-010 [P2] NavBar 移动端隐藏次要按钮
 - [x] CS-011 [P1] NavBar 余额 Anim 小数 ETH 格式
 - [x] CS-012 [P1] NavBar 连接中 loading 禁用重复点击
-- [ ] CS-013 [P1] NavBar 已连接点击跳转 wallet（已有，验 UX）
+- [x] CS-013 [P1] NavBar 已连接点击跳转 wallet（已有，验 UX）
 - [ ] CS-014 [P2] NavBar 顶栏增加断开连接下拉
 - [ ] CS-015 [P1] NavBar disconnect 接入（当前 void）
 - [ ] CS-016 [P2] NavBar sticky 滚动阴影增强

@@ -22,6 +22,7 @@ export const translations = {
     nav_wallet: '钱包',
     nav_menu_open: '打开导航菜单',
     nav_menu_close: '关闭导航菜单',
+    nav_wallet_open: '点击查看钱包',
 
     brand_sub: '保险协议',
     footer_tagline: '链上参数化保险，Oracle 验证后自动触发理赔',
@@ -353,6 +354,7 @@ export const translations = {
     nav_wallet: 'Wallet',
     nav_menu_open: 'Open navigation menu',
     nav_menu_close: 'Close navigation menu',
+    nav_wallet_open: 'Open wallet page',
 
     brand_sub: 'Insurance Protocol',
     footer_tagline: 'On-chain parametric insurance with oracle-verified auto claims',
@@ -684,6 +686,7 @@ export const translations = {
     nav_wallet: 'ウォレット',
     nav_menu_open: 'ナビゲーションメニューを開く',
     nav_menu_close: 'ナビゲーションメニューを閉じる',
+    nav_wallet_open: 'ウォレットページを開く',
 
     brand_sub: 'フライト保険',
     footer_tagline: 'オンチェーン・パラメトリック保険、Oracle 検証後に自動請求',
@@ -1014,6 +1017,7 @@ export const translations = {
     nav_wallet: '지갑',
     nav_menu_open: '내비게이션 메뉴 열기',
     nav_menu_close: '내비게이션 메뉴 닫기',
+    nav_wallet_open: '지갑 페이지 열기',
 
     brand_sub: '항공 보험',
     footer_tagline: '온체인 파라미터 보험, Oracle 검증 후 자동 청구',
